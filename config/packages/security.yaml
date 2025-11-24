@@ -1,23 +1,24 @@
 security:
-    enable_authenticator_manager: true
-
-    # Pas de password hasher nécessaire pour le SSO
-    password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: auto
 
     # =====================================================================
-    #  USER PROVIDER POUR SSO
+    #  HASHERS
+    # =====================================================================
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    # =====================================================================
+    #  USER PROVIDER pour SSO
     # =====================================================================
     providers:
         sso_provider:
             id: App\Security\SsoUserProvider
 
     # =====================================================================
-    #  FIREWALL PRINCIPAL
+    #  FIREWALLS
     # =====================================================================
     firewalls:
 
-        # Firewall dev : pas de sécurité
+        # Désactive la sécurité dans l'environnement dev
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
@@ -26,19 +27,30 @@ security:
         main:
             lazy: true
             provider: sso_provider
+
             custom_authenticators:
                 - App\Security\SsoAuthenticator
+
+            # Quand Symfony doit authentifier quelqu’un, il utilise ton authenticator SSO
             entry_point: App\Security\SsoAuthenticator
+
             logout:
                 path: /logout
 
+            # Pas de stateless → session utilisée
+            stateless: false
+
     # =====================================================================
-    # ACCESS CONTROL
+    #  ACCESS CONTROL
     # =====================================================================
     access_control:
-        - { path: ^/admin,   roles: ROLE_ADMIN }
-        - { path: ^/,        roles: ROLE_USER }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/, roles: ROLE_USER }
 
+
+# =====================================================================
+# CONFIG TEST
+# =====================================================================
 when@test:
     security:
         password_hashers:

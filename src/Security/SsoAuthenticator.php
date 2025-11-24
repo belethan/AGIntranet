@@ -18,20 +18,37 @@ class SsoAuthenticator extends AbstractAuthenticator
 
     public function authenticate(Request $request): SelfValidatingPassport
     {
-        // Priorité : REMOTE_USER (utilisé par Apache / Nginx)
-        $username =
-            $_SERVER['REMOTE_USER']
-            ?? $_SERVER['USER']
-            ?? $_SERVER['LOGNAME']
-            ?? trim(shell_exec('whoami'))
+        // 1) Variables possibles envoyées par Apache / Nginx
+        $username = $request->server->get('REMOTE_USER')
+            ?? $request->server->get('REDIRECT_REMOTE_USER')
+            ?? $request->server->get('PHP_AUTH_USER')
             ?? null;
 
         if (!$username) {
-            throw new AuthenticationException('Impossible de déterminer l’utilisateur SSO');
+            throw new AuthenticationException('SSO non actif ou identifiant absent');
+        }
+
+        // 2) Normalisation
+        // Format 1 : AGDUC\lcoquemert
+        if (str_contains($username, '\\')) {
+            $username = explode('\\', $username)[1];
+        }
+
+        // Format 2 : lcoquemert@agduc.com
+        if (str_contains($username, '@')) {
+            $username = explode('@', $username)[0];
+        }
+
+        // Format 3 : Mise en minuscule pour uniformité
+        $username = strtolower(trim($username));
+
+        if (!$username) {
+            throw new AuthenticationException('Identifiant SSO vide après normalisation');
         }
 
         return new SelfValidatingPassport(new UserBadge($username));
     }
+
 
     public function onAuthenticationSuccess(Request $request, $passport, string $firewallName): ?Response
     {

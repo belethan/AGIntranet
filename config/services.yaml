@@ -4,7 +4,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-
+    webservice_host: '%env(WEBSERVICE_HOST)%'
+    webservice_user: '%env(WEBSERVICE_USER)%'
+    webservice_pass: '%env(WEBSERVICE_PASS)%'
+    webservice_basepath: '%env(WEBSERVICE_BASEPATH)%'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -16,5 +19,9 @@ services:
     App\:
         resource: '../src/'
 
+    App\Service\UserInfoWebservice:
+        arguments:
+            $webClient: '@webservice.client'
+            $wsBasePath: '%webservice_basepath%'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
