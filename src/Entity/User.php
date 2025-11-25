@@ -58,20 +58,8 @@ class User
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $service = null;
 
-    #[ORM\Column(length: 7, nullable: true)]
-    private ?string $codagtresp = null;
-
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $serviceresp = null;
-
-    #[ORM\Column(length: 150, nullable: true)]
-    private ?string $nomresp = null;
-
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $prenomresp = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $mailresp = null;
 
     #[ORM\Column(length: 150, nullable: true)]
     private ?string $nomcj = null;
@@ -114,6 +102,33 @@ class User
 
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $roles = null;
+
+    #[ORM\Column(length: 24, nullable: true)]
+    private ?string $telportpro = null;
+
+    #[ORM\Column(length: 150, nullable: true)]
+    private ?string $compte_info = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $num_rpps = null;
+
+    #[ORM\Column]
+    private ?int $compte_actif = null;
+
+    #[ORM\Column(length: 8, nullable: true)]
+    private ?string $codagtResponsable = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $nomResponsable = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $prenomResponsable = null;
+
+    #[ORM\Column(length: 150, nullable: true)]
+    private ?string $mailResponsable = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $siteresp = null;
 
     public function getId(): ?int
     {
@@ -300,18 +315,6 @@ class User
         return $this;
     }
 
-    public function getCodagtresp(): ?string
-    {
-        return $this->codagtresp;
-    }
-
-    public function setCodagtresp(?string $codagtresp): static
-    {
-        $this->codagtresp = $codagtresp;
-
-        return $this;
-    }
-
     public function getServiceresp(): ?string
     {
         return $this->serviceresp;
@@ -324,43 +327,7 @@ class User
         return $this;
     }
 
-    public function getNomresp(): ?string
-    {
-        return $this->nomresp;
-    }
-
-    public function setNomresp(?string $nomresp): static
-    {
-        $this->nomresp = $nomresp;
-
-        return $this;
-    }
-
-    public function getPrenomresp(): ?string
-    {
-        return $this->prenomresp;
-    }
-
-    public function setPrenomresp(?string $prenomresp): static
-    {
-        $this->prenomresp = $prenomresp;
-
-        return $this;
-    }
-
-    public function getMailresp(): ?string
-    {
-        return $this->mailresp;
-    }
-
-    public function setMailresp(?string $mailresp): static
-    {
-        $this->mailresp = $mailresp;
-
-        return $this;
-    }
-
-    public function getNomcj(): ?string
+     public function getNomcj(): ?string
     {
         return $this->nomcj;
     }
@@ -524,6 +491,102 @@ class User
     public function setRoles(?string $roles): static
     {
         $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function getTelportpro(): ?string
+    {
+        return $this->telportpro;
+    }
+
+    public function setTelportpro(?string $telportpro): static
+    {
+        $this->telportpro = $telportpro;
+
+        return $this;
+    }
+
+    public function getNumRpps(): ?string
+    {
+        return $this->num_rpps;
+    }
+
+    public function setNumRpps(?string $num_rpps): static
+    {
+        $this->num_rpps = $num_rpps;
+
+        return $this;
+    }
+
+    public function getCompteActif(): ?int
+    {
+        return $this->compte_actif;
+    }
+
+    public function setCompteActif(int $compte_actif): static
+    {
+        $this->compte_actif = $compte_actif;
+
+        return $this;
+    }
+
+    public function getCodagtResponsable(): ?string
+    {
+        return $this->codagtResponsable;
+    }
+
+    public function setCodagtResponsable(?string $codagtResponsable): static
+    {
+        $this->codagtResponsable = $codagtResponsable;
+
+        return $this;
+    }
+
+    public function getNomResponsable(): ?string
+    {
+        return $this->nomResponsable;
+    }
+
+    public function setNomResponsable(?string $nomResponsable): static
+    {
+        $this->nomResponsable = $nomResponsable;
+
+        return $this;
+    }
+
+    public function getPrenomResponsable(): ?string
+    {
+        return $this->prenomResponsable;
+    }
+
+    public function setPrenomResponsable(?string $prenomResponsable): static
+    {
+        $this->prenomResponsable = $prenomResponsable;
+
+        return $this;
+    }
+
+    public function getMailResponsable(): ?string
+    {
+        return $this->mailResponsable;
+    }
+
+    public function setMailResponsable(?string $mailResponsable): static
+    {
+        $this->mailResponsable = $mailResponsable;
+
+        return $this;
+    }
+
+    public function getSiteresp(): ?string
+    {
+        return $this->siteresp;
+    }
+
+    public function setSiteresp(?string $siteresp): static
+    {
+        $this->siteresp = $siteresp;
 
         return $this;
     }
