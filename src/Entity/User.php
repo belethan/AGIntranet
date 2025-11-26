@@ -3,10 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -29,7 +33,7 @@ class User
     private ?int $sexe = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $dtenai = null;
+    private ?DateTime $dtenai = null;
 
     #[ORM\Column(length: 100)]
     private ?string $comnai = null;
@@ -49,9 +53,6 @@ class User
     #[ORM\Column(length: 6, nullable: true)]
     private ?string $notel = null;
 
-    #[ORM\Column(length: 120)]
-    private ?string $compteinfo = null;
-
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $site = null;
 
@@ -68,7 +69,7 @@ class User
     private ?string $prenomcj = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $datenaicj = null;
+    private ?DateTimeImmutable $datenaicj = null;
 
     #[ORM\Column(length: 2, nullable: true)]
     private ?string $codnat = null;
@@ -100,14 +101,11 @@ class User
     #[ORM\Column(length: 7)]
     private ?string $codagt = null;
 
-    #[ORM\Column(length: 30, nullable: true)]
-    private ?string $roles = null;
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
 
     #[ORM\Column(length: 24, nullable: true)]
     private ?string $telportpro = null;
-
-    #[ORM\Column(length: 150, nullable: true)]
-    private ?string $compte_info = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $num_rpps = null;
@@ -129,6 +127,39 @@ class User
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $siteresp = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $externalHash = null;
+
+    // Pas utilisé en SSO, mais interface PasswordAuthenticatedUserInterface l’exige
+    #[ORM\Column(nullable: true)]
+    private ?string $password = null;
+
+    #[ORM\Column(name: 'compte_info', length: 50, nullable: true)]
+    private ?string $compteinfo = null;
+
+
+    public function __construct(string $username = '')
+    {
+        if ($username !== '') {
+            $this->compteinfo = $username;
+        }
+
+        $this->roles = ['ROLE_USER'];
+    }
+
+    // ====================================================================
+    // Identity / Security
+    // ====================================================================
+
+    /**
+     * Identifiant unique pour Symfony (remplace getUsername()).
+     */
+    public function getUserIdentifier(): string
+    {
+        return $this->nomusu;
+    }
+
 
     public function getId(): ?int
     {
@@ -195,12 +226,12 @@ class User
         return $this;
     }
 
-    public function getDtenai(): ?\DateTime
+    public function getDtenai(): ?DateTime
     {
         return $this->dtenai;
     }
 
-    public function setDtenai(?\DateTime $dtenai): static
+    public function setDtenai(?DateTime $dtenai): static
     {
         $this->dtenai = $dtenai;
 
@@ -351,12 +382,12 @@ class User
         return $this;
     }
 
-    public function getDatenaicj(): ?\DateTimeImmutable
+    public function getDatenaicj(): ?DateTimeImmutable
     {
         return $this->datenaicj;
     }
 
-    public function setDatenaicj(?\DateTimeImmutable $datenaicj): static
+    public function setDatenaicj(?DateTimeImmutable $datenaicj): static
     {
         $this->datenaicj = $datenaicj;
 
@@ -483,15 +514,31 @@ class User
         return $this;
     }
 
-    public function getRoles(): ?string
+    public function getRoles(): array
     {
-        return $this->roles;
+        // ROLE_USER est toujours ajouté
+        $roles = $this->roles;
+        if (!in_array('ROLE_USER', $roles, true)) {
+            $roles[] = 'ROLE_USER';
+        }
+
+        return array_unique($roles);
     }
 
-    public function setRoles(?string $roles): static
+    public function setRoles(array $roles): self
     {
         $this->roles = $roles;
+        return $this;
+    }
 
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(?string $password): self
+    {
+        $this->password = $password;
         return $this;
     }
 
@@ -589,5 +636,28 @@ class User
         $this->siteresp = $siteresp;
 
         return $this;
+    }
+
+    public function getExternalHash(): ?string
+    {
+        return $this->externalHash;
+    }
+
+    public function setExternalHash(?string $externalHash): self
+    {
+        $this->externalHash = $externalHash;
+        return $this;
+    }
+
+    public function getInitiales(): string
+    {
+        $initialeNom = $this->nomusu ? mb_substr($this->nomusu, 0, 1) : '';
+        $initialePrenom = $this->prenom ? mb_substr($this->prenom, 0, 1) : '';
+        return mb_strtoupper($initialeNom . $initialePrenom);
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Nothing to clean up
     }
 }

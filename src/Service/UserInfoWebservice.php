@@ -1,15 +1,27 @@
 <?php
 namespace App\Service;
 
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class UserInfoWebservice
 {
     public function __construct(
-        private HttpClientInterface $webClient,
-        private string $wsBasePath
+        private readonly HttpClientInterface $webClient,
+        private readonly string              $wsBasePath
     ) {}
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     */
     public function fetchUserData(string $username): array
     {
         // Construction dynamique de l’URL à partir du basePath
