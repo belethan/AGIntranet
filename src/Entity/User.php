@@ -3,10 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -29,7 +33,7 @@ class User
     private ?int $sexe = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $dtenai = null;
+    private ?DateTime $dtenai = null;
 
     #[ORM\Column(length: 100)]
     private ?string $comnai = null;
@@ -49,29 +53,14 @@ class User
     #[ORM\Column(length: 6, nullable: true)]
     private ?string $notel = null;
 
-    #[ORM\Column(length: 120)]
-    private ?string $compteinfo = null;
-
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $site = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $service = null;
 
-    #[ORM\Column(length: 7, nullable: true)]
-    private ?string $codagtresp = null;
-
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $serviceresp = null;
-
-    #[ORM\Column(length: 150, nullable: true)]
-    private ?string $nomresp = null;
-
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $prenomresp = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $mailresp = null;
 
     #[ORM\Column(length: 150, nullable: true)]
     private ?string $nomcj = null;
@@ -80,7 +69,7 @@ class User
     private ?string $prenomcj = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $datenaicj = null;
+    private ?DateTimeImmutable $datenaicj = null;
 
     #[ORM\Column(length: 2, nullable: true)]
     private ?string $codnat = null;
@@ -112,8 +101,65 @@ class User
     #[ORM\Column(length: 7)]
     private ?string $codagt = null;
 
-    #[ORM\Column(length: 30, nullable: true)]
-    private ?string $roles = null;
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    #[ORM\Column(length: 24, nullable: true)]
+    private ?string $telportpro = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $num_rpps = null;
+
+    #[ORM\Column]
+    private ?int $compte_actif = null;
+
+    #[ORM\Column(length: 8, nullable: true)]
+    private ?string $codagtResponsable = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $nomResponsable = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $prenomResponsable = null;
+
+    #[ORM\Column(length: 150, nullable: true)]
+    private ?string $mailResponsable = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $siteresp = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $externalHash = null;
+
+    // Pas utilisé en SSO, mais interface PasswordAuthenticatedUserInterface l’exige
+    #[ORM\Column(nullable: true)]
+    private ?string $password = null;
+
+    #[ORM\Column(name: 'compte_info', length: 50, nullable: true)]
+    private ?string $compteinfo = null;
+
+
+    public function __construct(string $username = '')
+    {
+        if ($username !== '') {
+            $this->compteinfo = $username;
+        }
+
+        $this->roles = ['ROLE_USER'];
+    }
+
+    // ====================================================================
+    // Identity / Security
+    // ====================================================================
+
+    /**
+     * Identifiant unique pour Symfony (remplace getUsername()).
+     */
+    public function getUserIdentifier(): string
+    {
+        return $this->nomusu;
+    }
+
 
     public function getId(): ?int
     {
@@ -180,12 +226,12 @@ class User
         return $this;
     }
 
-    public function getDtenai(): ?\DateTime
+    public function getDtenai(): ?DateTime
     {
         return $this->dtenai;
     }
 
-    public function setDtenai(?\DateTime $dtenai): static
+    public function setDtenai(?DateTime $dtenai): static
     {
         $this->dtenai = $dtenai;
 
@@ -300,18 +346,6 @@ class User
         return $this;
     }
 
-    public function getCodagtresp(): ?string
-    {
-        return $this->codagtresp;
-    }
-
-    public function setCodagtresp(?string $codagtresp): static
-    {
-        $this->codagtresp = $codagtresp;
-
-        return $this;
-    }
-
     public function getServiceresp(): ?string
     {
         return $this->serviceresp;
@@ -324,43 +358,7 @@ class User
         return $this;
     }
 
-    public function getNomresp(): ?string
-    {
-        return $this->nomresp;
-    }
-
-    public function setNomresp(?string $nomresp): static
-    {
-        $this->nomresp = $nomresp;
-
-        return $this;
-    }
-
-    public function getPrenomresp(): ?string
-    {
-        return $this->prenomresp;
-    }
-
-    public function setPrenomresp(?string $prenomresp): static
-    {
-        $this->prenomresp = $prenomresp;
-
-        return $this;
-    }
-
-    public function getMailresp(): ?string
-    {
-        return $this->mailresp;
-    }
-
-    public function setMailresp(?string $mailresp): static
-    {
-        $this->mailresp = $mailresp;
-
-        return $this;
-    }
-
-    public function getNomcj(): ?string
+     public function getNomcj(): ?string
     {
         return $this->nomcj;
     }
@@ -384,12 +382,12 @@ class User
         return $this;
     }
 
-    public function getDatenaicj(): ?\DateTimeImmutable
+    public function getDatenaicj(): ?DateTimeImmutable
     {
         return $this->datenaicj;
     }
 
-    public function setDatenaicj(?\DateTimeImmutable $datenaicj): static
+    public function setDatenaicj(?DateTimeImmutable $datenaicj): static
     {
         $this->datenaicj = $datenaicj;
 
@@ -516,15 +514,150 @@ class User
         return $this;
     }
 
-    public function getRoles(): ?string
+    public function getRoles(): array
     {
-        return $this->roles;
+        // ROLE_USER est toujours ajouté
+        $roles = $this->roles;
+        if (!in_array('ROLE_USER', $roles, true)) {
+            $roles[] = 'ROLE_USER';
+        }
+
+        return array_unique($roles);
     }
 
-    public function setRoles(?string $roles): static
+    public function setRoles(array $roles): self
     {
         $this->roles = $roles;
+        return $this;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(?string $password): self
+    {
+        $this->password = $password;
+        return $this;
+    }
+
+    public function getTelportpro(): ?string
+    {
+        return $this->telportpro;
+    }
+
+    public function setTelportpro(?string $telportpro): static
+    {
+        $this->telportpro = $telportpro;
 
         return $this;
+    }
+
+    public function getNumRpps(): ?string
+    {
+        return $this->num_rpps;
+    }
+
+    public function setNumRpps(?string $num_rpps): static
+    {
+        $this->num_rpps = $num_rpps;
+
+        return $this;
+    }
+
+    public function getCompteActif(): ?int
+    {
+        return $this->compte_actif;
+    }
+
+    public function setCompteActif(int $compte_actif): static
+    {
+        $this->compte_actif = $compte_actif;
+
+        return $this;
+    }
+
+    public function getCodagtResponsable(): ?string
+    {
+        return $this->codagtResponsable;
+    }
+
+    public function setCodagtResponsable(?string $codagtResponsable): static
+    {
+        $this->codagtResponsable = $codagtResponsable;
+
+        return $this;
+    }
+
+    public function getNomResponsable(): ?string
+    {
+        return $this->nomResponsable;
+    }
+
+    public function setNomResponsable(?string $nomResponsable): static
+    {
+        $this->nomResponsable = $nomResponsable;
+
+        return $this;
+    }
+
+    public function getPrenomResponsable(): ?string
+    {
+        return $this->prenomResponsable;
+    }
+
+    public function setPrenomResponsable(?string $prenomResponsable): static
+    {
+        $this->prenomResponsable = $prenomResponsable;
+
+        return $this;
+    }
+
+    public function getMailResponsable(): ?string
+    {
+        return $this->mailResponsable;
+    }
+
+    public function setMailResponsable(?string $mailResponsable): static
+    {
+        $this->mailResponsable = $mailResponsable;
+
+        return $this;
+    }
+
+    public function getSiteresp(): ?string
+    {
+        return $this->siteresp;
+    }
+
+    public function setSiteresp(?string $siteresp): static
+    {
+        $this->siteresp = $siteresp;
+
+        return $this;
+    }
+
+    public function getExternalHash(): ?string
+    {
+        return $this->externalHash;
+    }
+
+    public function setExternalHash(?string $externalHash): self
+    {
+        $this->externalHash = $externalHash;
+        return $this;
+    }
+
+    public function getInitiales(): string
+    {
+        $initialeNom = $this->nomusu ? mb_substr($this->nomusu, 0, 1) : '';
+        $initialePrenom = $this->prenom ? mb_substr($this->prenom, 0, 1) : '';
+        return mb_strtoupper($initialeNom . $initialePrenom);
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Nothing to clean up
     }
 }
