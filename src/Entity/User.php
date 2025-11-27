@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\Types\Integer;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -98,7 +99,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 5, nullable: true)]
     private ?string $numrue = null;
 
-    #[ORM\Column(length: 7)]
+    #[ORM\Column(type:"string",length: 7)]
     private ?string $codagt = null;
 
     #[ORM\Column(type: 'json')]
@@ -138,6 +139,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'compte_info', length: 50, nullable: true)]
     private ?string $compteinfo = null;
 
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $username = null;
+
 
     public function __construct(string $username = '')
     {
@@ -157,7 +161,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return $this->nomusu;
+        return $this->username ?? '';
     }
 
 
@@ -165,6 +169,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->id;
     }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): self
+    {
+        $this->username = strtolower($username);
+
+        return $this;
+    }
+
 
     public function getNomusu(): ?string
     {
@@ -303,10 +320,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->notel;
     }
 
-    public function setNotel(?string $notel): static
+    public function setNotel(string|int|null $notel): self
     {
-        $this->notel = $notel;
-
+        $this->notel = $notel !== null ? (string)$notel : null;
         return $this;
     }
 
@@ -399,7 +415,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->codnat;
     }
 
-    public function setCodnat(?string $codnat): static
+    public function setCodnat(?string $codnat): self
     {
         $this->codnat = $codnat;
 
@@ -507,7 +523,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->codagt;
     }
 
-    public function setCodagt(string $codagt): static
+    public function setCodagt(string $codagt): self
     {
         $this->codagt = $codagt;
 

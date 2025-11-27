@@ -16,7 +16,7 @@ class SsoUserProvider implements UserProviderInterface
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
         // 1. On cherche l'utilisateur dans MySQL
-        $user = $this->repo->findOneBy(['compteinfo' => $identifier]);
+        $user = $this->repo->findOneBy(['username' => $identifier]);
 
         if ($user) {
             return $user;
@@ -35,7 +35,7 @@ class SsoUserProvider implements UserProviderInterface
 
         // IMPORTANT : on recharge depuis Doctrine pour rester synchro
         // Si l'utilisateur n’est pas encore en DB, on retourne l'objet minimal
-        return $this->repo->findOneBy(['compteinfo' => $user->getCompteinfo()]) ?? $user;
+        return $this->repo->findOneBy(['username' => $user->getUsername()]) ?? $user;
     }
 
     public function supportsClass(string $class): bool

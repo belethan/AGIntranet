@@ -30,7 +30,16 @@ class SsoAuthenticator extends AbstractAuthenticator
 
     public function supports(Request $request): ?bool
     {
-        // On protège toutes les URL sauf /login (géré par access_control)
+        // Désactive le SSO pour ces routes
+        if (in_array($request->getPathInfo(), [
+            '/',
+            '/login',
+            '/test-ws',
+            '/test-env'
+        ])) {
+            return false;
+        }
+
         return true;
     }
 
@@ -90,6 +99,22 @@ class SsoAuthenticator extends AbstractAuthenticator
      */
     private function extractSsoUsername(Request $request): ?string
     {
+        // 1. Récupération sûre des variables d'env
+        $mode = $request->server->get('SSO_MODE')
+            ?? getenv('SSO_MODE')
+            ?? $_ENV['SSO_MODE']
+            ?? 'prod';
+
+        // MODE DEV : utilisateur simulé
+        if ($mode === 'dev') {
+            return strtolower(
+                $request->server->get('SSO_DEV_USER')
+                ?? getenv('SSO_DEV_USER')
+                ?? 'lcoquemert'
+            );
+        }
+
+        // MODE PROD : SSO réel
         $username =
             $request->server->get('REMOTE_USER')
             ?? $request->server->get('REDIRECT_REMOTE_USER')
@@ -99,13 +124,11 @@ class SsoAuthenticator extends AbstractAuthenticator
             return null;
         }
 
-        // Forme AGDUC\lcoquemert
         if (str_contains($username, '\\')) {
             $parts = explode('\\', $username);
             $username = end($parts);
         }
 
-        // Forme lcoquemert@agduc.com
         if (str_contains($username, '@')) {
             $parts = explode('@', $username);
             $username = $parts[0];
@@ -113,4 +136,6 @@ class SsoAuthenticator extends AbstractAuthenticator
 
         return strtolower(trim($username));
     }
+
+
 }

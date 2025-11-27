@@ -1,45 +1,56 @@
 <?php
+
 namespace App\Service;
 
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Exception;
+use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class UserInfoWebservice
+readonly class UserInfoWebservice
 {
     public function __construct(
-        private readonly HttpClientInterface $webClient,
-        private readonly string              $wsBasePath
+        private HttpClientInterface $webClient,
+        private string              $wsHost,
+        private string              $wsBasePath,
+        private string              $wsBasic,
+        private bool                $ignoreSsl
     ) {}
 
     /**
+     * Appel du Webservice AGDUC pour récupérer les infos utilisateur
+     * @throws Exception
      * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
      * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
      */
     public function fetchUserData(string $username): array
     {
-        // Construction dynamique de l’URL à partir du basePath
-        $url = sprintf("%s/LOGIN/%s", $this->wsBasePath, $username);
+        $url = rtrim($this->wsHost, '/') . '/' . trim($this->wsBasePath, '/') . "/LOGIN/" . $username;
 
-        // Appel du WebService avec options SSL si nécessaire
-        $response = $this->webClient->request('GET', $url, [
-            'verify_peer' => false,   // tu peux mettre true en production
-            'verify_host' => false,
-        ]);
+        // Si ton env contient "login:password"
+        $auth = base64_encode($this->wsBasic);
 
-        if ($response->getStatusCode() !== 200) {
-            throw new \Exception(
-                "WebService erreur HTTP : " . $response->getStatusCode()
-            );
+        $options = [
+            'headers' => [
+                'Authorization' => 'Basic ' . $auth,
+                'Accept'        => 'application/json'
+            ]
+        ];
+
+        if ($this->ignoreSsl) {
+            $options['verify_peer'] = false;
+            $options['verify_host'] = false;
         }
 
-        return $response->toArray();
-    }
+        $response = $this->webClient->request('GET', $url, $options);
 
+        $status = $response->getStatusCode();
+
+        if ($status !== 200) {
+            throw new RuntimeException("WebService AGDUC erreur HTTP " . $status);
+        }
+
+        return $response->toArray(false);
+    }
 }

@@ -31,8 +31,10 @@ security:
             custom_authenticators:
                 - App\Security\SsoAuthenticator
 
+           # Ne pas appliquer l'authentification SSO pour /test-ws
+            pattern: ^/(?!test-ws).*
             # Quand Symfony doit authentifier quelqu’un, il utilise ton authenticator SSO
-            entry_point: App\Security\SsoAuthenticator
+            entry_point: App\Security\SsoEntryPoint
 
             logout:
                 path: /logout
