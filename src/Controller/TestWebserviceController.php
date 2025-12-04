@@ -17,7 +17,7 @@ class TestWebserviceController extends AbstractController
         UserSynchronizer $synchronizer
     ): JsonResponse
     {
-        $username = $_ENV['SSO_DEV_USER'] ?? 'lcoquemert';
+        $username = $_ENV['SSO_DEV_USER'] ?? 'lfournier';
         dump('Start of the process', $username); // <-- Ajoute ça ici
 
         try {

@@ -1,8 +1,15 @@
 framework:
     asset_mapper:
-        # The paths to make available to the asset mapper.
+        # Les répertoires sources pour les assets publics
         paths:
-            - assets/
+            - assets/images/static
+            - assets/images/pages
+            - assets/images/users
+            - assets/css
+            - assets/js
+            - assets/fonts
+
+        # Comportement lorsqu'un import est introuvable
         missing_import_mode: strict
 
 when@prod:
