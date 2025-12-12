@@ -1,18 +1,14 @@
 framework:
     asset_mapper:
-        # Les répertoires sources pour les assets publics
+        # Racine unique des assets (recommandé Symfony 7)
         paths:
-            - assets/images/static
-            - assets/images/pages
-            - assets/images/users
-            - assets/css
-            - assets/js
-            - assets/fonts
+            - assets
 
-        # Comportement lorsqu'un import est introuvable
+        # En dev : on veut des erreurs strictes
         missing_import_mode: strict
 
 when@prod:
     framework:
         asset_mapper:
+            # En prod : warning seulement (tolérance)
             missing_import_mode: warn

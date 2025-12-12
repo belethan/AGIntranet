@@ -1,0 +1,19 @@
+{# JS commun via importmap #}
+{{ importmap('app') }}
+
+{# JS FRONT #}
+{% if asset_group is defined and asset_group == 'front' %}
+    {{ importmap('front') }}
+{% endif %}
+
+{# JS BACK / ADMIN #}
+{% if asset_group is defined and asset_group == 'admin' %}
+    {{ importmap('admin') }}
+{% endif %}
+
+{% if asset_group is defined and asset_group == 'auth' %}
+    {{ importmap('login') }}
+{% endif %}
+
+{# JS page spécifique #}
+{% block page_javascripts %}{% endblock %}

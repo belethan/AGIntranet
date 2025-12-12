@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Exception;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -35,7 +36,7 @@ readonly class DocumentWebservice
         ]);
 
         if ($response->getStatusCode() !== 200) {
-            throw new \Exception("Erreur WebService DOC: HTTP " . $response->getStatusCode());
+            throw new Exception("Erreur WebService DOC: HTTP " . $response->getStatusCode());
         }
 
         return $response->toArray();
@@ -60,7 +61,7 @@ readonly class DocumentWebservice
         ]);
 
         if ($response->getStatusCode() !== 200) {
-            throw new \Exception("Erreur WebService DOCKEY: HTTP " . $response->getStatusCode());
+            throw new Exception("Erreur WebService DOCKEY: HTTP " . $response->getStatusCode());
         }
 
         $data = $response->toArray();

@@ -11,7 +11,7 @@ class SsoEntryPoint implements AuthenticationEntryPointInterface
     public function start(Request $request, \Throwable $authException = null): \Symfony\Component\HttpFoundation\Response
     {
         // Si pas authentifié → on force simplement la page racine
-        return new RedirectResponse('/');
+        return new RedirectResponse('/login');
     }
 }
 

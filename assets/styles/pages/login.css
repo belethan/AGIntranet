@@ -1,0 +1,169 @@
+/* ===============================
+   LOGIN – GLOBAL BACKGROUND
+================================ */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background:
+        radial-gradient(80% 80% at 70% 0%, rgba(255,255,255,0.9), rgba(255,255,255,0)),
+        radial-gradient(100% 100% at 0% 100%, rgba(183,156,255,0.35), rgba(255,255,255,0)),
+        radial-gradient(100% 100% at 100% 100%, rgba(124,161,220,0.35), rgba(255,255,255,0));
+
+    padding: 20px;
+}
+
+/* ===============================
+   LOGIN CARD
+================================ */
+.login-card {
+    width: 100%;
+    max-width: 1100px;
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.85),
+        rgba(236,224,255,0.85)
+    );
+
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+/* ===============================
+   LEFT SIDE
+================================ */
+.login-left {
+    padding: 60px 50px;
+}
+
+.login-title {
+    font-family: Montserrat, sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 40px;
+}
+
+.login-input {
+    height: 48px;
+    border-radius: 14px;
+    border: none;
+    padding: 0 20px;
+    font-size: 14px;
+}
+
+.login-input::placeholder {
+    color: #B0B0B0;
+}
+
+.login-eye {
+    position: absolute;
+    right: 18px;
+    top: 42px;
+    color: #999;
+    cursor: pointer;
+}
+
+.login-btn {
+    height: 48px;
+    border-radius: 14px;
+    background: #3E3E3E;
+    color: #FFF;
+    font-weight: 500;
+    border: none;
+}
+
+.login-btn:hover {
+    background: #2C2C2C;
+}
+
+/* ===============================
+   RIGHT SIDE
+================================ */
+.login-right {
+    padding: 60px 40px;
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-welcome {
+    font-size: 32px;
+    font-weight: 600;
+    color: #2E2E2E;
+}
+
+.login-welcome span {
+    font-weight: 400;
+}
+
+.login-logo {
+    max-width: 180px;
+    margin: 30px auto;
+}
+
+.login-chatbot {
+    margin-top: 20px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: #444;
+}
+
+/* Bouton œil (toggle password) */
+.login-eye-btn {
+    position: absolute;
+    top: 38px;              /* aligné avec l’input */
+    right: 14px;
+
+    background: none;
+    border: none;
+    padding: 0;
+
+    color: #8A8FA3;
+    cursor: pointer;
+    line-height: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-eye-btn:hover {
+    color: #45556C;
+}
+
+.login-eye-btn:focus-visible {
+    outline: 2px solid #B79CFF;
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 991px) {
+    .login-left,
+    .login-right {
+        padding: 40px 30px;
+    }
+
+    .login-welcome {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-right {
+        display: none;
+    }
+    .login-eye-btn {
+        top: 36px;
+        right: 12px;
+    }
+}
