@@ -1,6 +1,22 @@
 {% extends 'front/front.html.twig' %}
 
-{% block page_content %}
-    <h1>Accueil Intranet</h1>
-    <p>Contenu spécifique à la page.</p>
+{% block title %}
+    Accueil | Intranet AGDUC
+{% endblock %}
+
+{% block front %}
+    <section class="home">
+
+        <h1>Accueil Intranet</h1>
+
+        <p>Contenu spécifique à la page.</p>
+
+        {% if app.user %}
+            <p>
+                Bienvenue
+                <strong>{{ app.user.prenom }} {{ app.user.nom }}</strong>
+            </p>
+        {% endif %}
+
+    </section>
 {% endblock %}

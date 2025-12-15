@@ -1,4 +1,4 @@
-{% extends '@layout/base.html.twig' %}
+{% extends 'layout/base.html.twig' %}
 
 {% set asset_group = 'auth' %}
 
@@ -9,84 +9,81 @@
 
         <div class="login-card">
 
-            <div class="row g-0 h-100">
+            {# ===================== #}
+            {# COLONNE GAUCHE : FORM  #}
+            {# ===================== #}
+            <div class="login-left">
 
-                <!-- ===================== -->
-                <!-- COLONNE GAUCHE : FORM -->
-                <!-- ===================== -->
-                <div class="col-12 col-lg-6 login-left">
+                <h1 class="login-title">Se connecter</h1>
 
-                    <h1 class="login-title">Se connecter</h1>
+                {% if error %}
+                    <div class="alert alert-danger mb-4">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
 
-                    {# ===================== #}
-                    {# ERREUR AUTHENTIFICATION #}
-                    {# ===================== #}
-                    {% if error %}
-                        <div class="alert alert-danger mb-4">
-                            {{ error.messageKey|trans(error.messageData, 'security') }}
-                        </div>
-                    {% endif %}
+                <form method="post" class="login-form">
 
-                    <form method="post" class="login-form">
+                    <input type="hidden"
+                           name="_csrf_token"
+                           value="{{ csrf_token('authenticate') }}">
 
-                        {# ===================== #}
-                        {# CSRF TOKEN #}
-                        {# ===================== #}
-                        <input type="hidden" name="_csrf_token"
-                               value="{{ csrf_token('authenticate') }}">
-
-                        <label for="username" class="form-label">Identifiant</label>
+                    <div class="mb-4">
+                        <label for="username">Identifiant</label>
                         <input
                             type="text"
                             id="username"
                             name="username"
-                            class="form-control login-input"
+                            class="login-input"
                             placeholder="email ou identifiant"
                             value="{{ last_username }}"
                             autocomplete="username"
                             required
                         >
+                    </div>
 
-                        <div class="mb-4 position-relative">
-                            <label for="password" class="form-label">Mot de passe</label>
+                    <div class="mb-4 position-relative">
+                        <label for="password">Mot de passe</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="login-input"
+                            placeholder="************"
+                            autocomplete="current-password"
+                            required
+                        >
 
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                class="form-control login-input pe-5"
-                                placeholder="************"
-                                autocomplete="current-password"
-                                required
-                            >
+                        <button
+                            type="button"
+                            class="login-eye-btn"
+                            aria-label="Afficher ou masquer le mot de passe"
+                            data-toggle-password
+                        >
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
 
-                            <button
-                                type="button"
-                                class="login-eye-btn"
-                                aria-label="Afficher ou masquer le mot de passe"
-                                aria-pressed="false"
-                                data-toggle-password
-                            >
-                                <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
-                        </div>
+                    <button type="submit" class="login-btn">
+                        Connexion
+                    </button>
 
-                    </form>
+                </form>
+            </div>
 
-                </div>
+            {# ===================== #}
+            {# COLONNE DROITE : BRAND #}
+            {# ===================== #}
+            <div class="login-right">
 
-                <!-- ===================== -->
-                <!-- COLONNE DROITE : BRAND -->
-                <!-- ===================== -->
-                <div class="col-12 col-lg-6 login-right">
+                <h2 class="login-welcome">
+                    Bienvenue<br>
+                    <span>sur l’intranet</span>
+                </h2>
 
-                    <h2 class="login-welcome">
-                        Bienvenue<br>
-                        <span>sur l’intranet</span>
-                    </h2>
-
+                <div class="login-right-center">
                     <img
-                        src="{{ asset('images/static/logoagduc.png') }}"
+                        src="{{ asset('images/static/grandlogoagduc.png') }}"
                         alt="AGDUC"
                         class="login-logo"
                     >
@@ -94,7 +91,6 @@
                     <p class="login-chatbot">
                         CHATBOT (signal ou autre)
                     </p>
-
                 </div>
 
             </div>

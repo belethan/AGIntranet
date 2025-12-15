@@ -1,11 +1,11 @@
 # This file is the entry point to configure your own services.
 
 parameters:
-    # Webservice AGDUC (chargé depuis .env / .env.local)
+    # Webservice AGDUC (valeurs définies dans .env / .env.test)
     ws_host: '%env(WEBSERVICE_HOST)%'
     ws_basepath: '%env(WEBSERVICE_BASEPATH)%'
     ws_basic: '%env(WEBSERVICE_BASIC)%'
-    ws_ignore_ssl: '%env(bool:AGDUC_IGNORE_SSL)%'
+    ws_ignore_ssl: '%env(AGDUC_IGNORE_SSL)%'
 
 
 services:
