@@ -1,7 +1,7 @@
 security:
 
     # =====================================================================
-    #  HASHERS
+    #  PASSWORD HASHERS
     # =====================================================================
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: auto
@@ -11,11 +11,11 @@ security:
     # =====================================================================
     providers:
 
-        # SSO (Kerberos / WS / autre)
+        # Provider SSO (Kerberos / WS / AGDUC)
         sso_provider:
             id: App\Security\SsoUserProvider
 
-        # Login manuel (BDD)
+        # Provider login manuel (BDD)
         app_user_provider:
             entity:
                 class: App\Entity\User
@@ -26,22 +26,23 @@ security:
     # =====================================================================
     firewalls:
 
-        # Désactivation sécurité DEV
+        # Désactivation sécurité pour les assets & debug
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        # Firewall principal (SSO prioritaire)
         main:
             lazy: true
 
             # Provider principal = SSO
             provider: sso_provider
 
-            # Authentificateurs (ordre important)
+            # Authentificateur SSO
             custom_authenticators:
                 - App\Security\SsoAuthenticator
 
-            # Fallback login classique
+            # Login manuel (fallback)
             form_login:
                 login_path: app_login
                 check_path: app_login
@@ -50,7 +51,7 @@ security:
                 password_parameter: password
                 default_target_path: /
 
-            # Entry point = SSO
+            # Entry point SSO
             entry_point: App\Security\SsoEntryPoint
 
             logout:
@@ -63,6 +64,11 @@ security:
     #  ACCESS CONTROL
     # =====================================================================
     access_control:
+        # Page de login accessible à tous
         - { path: ^/login, roles: PUBLIC_ACCESS }
+
+        # Accès admin
         - { path: ^/admin, roles: ROLE_ADMIN }
+
+        # Toute autre page nécessite un user authentifié
         - { path: ^/, roles: ROLE_USER }

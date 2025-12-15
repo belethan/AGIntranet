@@ -20,23 +20,22 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-class SsoAuthenticator extends AbstractAuthenticator
+final class SsoAuthenticator extends AbstractAuthenticator
 {
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly UserInfoWebservice    $userInfoWebservice,
         private readonly UserSynchronizer      $userSynchronizer,
+        private readonly SsoUserProvider       $userProvider, // ✅ SERVICE CONCRET
     ) {}
 
     public function supports(Request $request): ?bool
     {
-        // Désactive le SSO pour ces routes
         if (in_array($request->getPathInfo(), [
-            '/',
             '/login',
             '/test-ws',
-            '/test-env'
-        ])) {
+            '/test-env',
+        ], true)) {
             return false;
         }
 
@@ -45,16 +44,27 @@ class SsoAuthenticator extends AbstractAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        // 1) Récupération du username SSO
         $username = $this->extractSsoUsername($request);
+
+        file_put_contents(
+            dirname(__DIR__, 2).'/var/log/sso.log',
+            sprintf("[%s] USERNAME SSO = %s\n", date('Y-m-d H:i:s'), var_export($username, true)),
+            FILE_APPEND
+        );
 
         if (!$username) {
             throw new AuthenticationException('Impossible de déterminer l’utilisateur SSO.');
         }
 
-        // 2) Passport auto-validant (pas de mot de passe)
+        if (!$username) {
+            throw new AuthenticationException('Impossible de déterminer l’utilisateur SSO.');
+        }
+
         return new SelfValidatingPassport(
-            new UserBadge($username)
+            new UserBadge(
+                $username,
+                fn (string $identifier) => $this->userProvider->loadUserByIdentifier($identifier)
+            )
         );
     }
 
@@ -65,47 +75,36 @@ class SsoAuthenticator extends AbstractAuthenticator
      * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      */
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
-    {
+    public function onAuthenticationSuccess(
+        Request $request,
+        TokenInterface $token,
+        string $firewallName
+    ): ?Response {
         $username = $token->getUserIdentifier();
 
-        // 1) Appel du WebService pour récupérer les infos utilisateur
         $wsData = $this->userInfoWebservice->fetchUserData($username);
+        $user   = $this->userSynchronizer->sync($username, $wsData);
 
-        // Optionnel : si le WS te dit que l'utilisateur n'a pas le droit :
-        // if (($wsData['authorized'] ?? true) === false) {
-        //     throw new AuthenticationException('Utilisateur non autorisé sur l’Intranet.');
-        // }
-
-        // 2) Synchronisation BDD (création / mise à jour / hash)
-        $user = $this->userSynchronizer->sync($username, $wsData);
-
-        // 3) Mise à jour du token avec le User fraîchement synchro
         $token->setUser($user);
 
-        // 4) Redirection vers la page principale (ex: tableau de bord intranet)
-        return new RedirectResponse($this->urlGenerator->generate('app_home'));
+        // Laisser Symfony continuer la requête normalement
+        return null;
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
-    {
-        // En cas d’échec SSO ou WS, on renvoie vers la page /login
-        // Tu peux y afficher le message d’erreur si besoin.
+    public function onAuthenticationFailure(
+        Request $request,
+        AuthenticationException $exception
+    ): ?Response {
         return new RedirectResponse($this->urlGenerator->generate('app_login'));
     }
 
-    /**
-     * Extraction du username à partir des variables serveur SSO (Apache / Nginx).
-     */
     private function extractSsoUsername(Request $request): ?string
     {
-        // 1. Récupération sûre des variables d'env
         $mode = $request->server->get('SSO_MODE')
             ?? getenv('SSO_MODE')
             ?? $_ENV['SSO_MODE']
             ?? 'prod';
 
-        // MODE DEV : utilisateur simulé
         if ($mode === 'dev') {
             return strtolower(
                 $request->server->get('SSO_DEV_USER')
@@ -114,28 +113,22 @@ class SsoAuthenticator extends AbstractAuthenticator
             );
         }
 
-        // MODE PROD : SSO réel
         $username =
             $request->server->get('REMOTE_USER')
-            ?? $request->server->get('REDIRECT_REMOTE_USER')
-            ?? null;
+            ?? $request->server->get('REDIRECT_REMOTE_USER');
 
         if (!$username) {
             return null;
         }
 
         if (str_contains($username, '\\')) {
-            $parts = explode('\\', $username);
-            $username = end($parts);
+            $username = substr($username, strrpos($username, '\\') + 1);
         }
 
         if (str_contains($username, '@')) {
-            $parts = explode('@', $username);
-            $username = $parts[0];
+            $username = substr($username, 0, strpos($username, '@'));
         }
 
         return strtolower(trim($username));
     }
-
-
 }

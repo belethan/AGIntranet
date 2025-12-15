@@ -1,19 +1,10 @@
-{# JS commun via importmap #}
+{# ============================================================
+   Chargement des scripts JavaScript via ImportMap
+   Entrypoint unique : app
+   ============================================================ #}
+
 {{ importmap('app') }}
 
-{# JS FRONT #}
-{% if asset_group is defined and asset_group == 'front' %}
-    {{ importmap('front') }}
-{% endif %}
-
-{# JS BACK / ADMIN #}
-{% if asset_group is defined and asset_group == 'admin' %}
-    {{ importmap('admin') }}
-{% endif %}
-
-{% if asset_group is defined and asset_group == 'auth' %}
-    {{ importmap('app') }}
-{% endif %}
-
-{# JS page spécifique #}
+{# Bloc optionnel pour scripts spécifiques à une page #}
 {% block page_javascripts %}{% endblock %}
+

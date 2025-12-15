@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PersonnelDocRepository;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -24,19 +25,19 @@ class PersonnelDoc
     private ?string $doc_ref = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $dtedeb = null;
+    private ?DateTimeImmutable $dtedeb = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $flag_actif = null;
+    private ?int $flag_actif;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $dtefin = null;
+    private ?DateTimeImmutable $dtefin = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $dtecreation = null;
+    private ?DateTimeImmutable $dtecreation;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $dtemodif = null;
+    private ?DateTimeImmutable $dtemodif = null;
 
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $opecreation = null;
@@ -48,12 +49,12 @@ class PersonnelDoc
     private ?string $libtype = null;
 
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
-    private ?int $flag_ligne = null;
+    private ?int $flag_ligne;
 
 
     public function __construct()
     {
-        $this->dtecreation = new \DateTimeImmutable();
+        $this->dtecreation = new DateTimeImmutable();
         $this->flag_actif = true;
         $this->flag_ligne = 0; // Valeur par défaut si nécessaire
     }
@@ -106,12 +107,12 @@ class PersonnelDoc
         return $this;
     }
 
-    public function getDtedeb(): ?\DateTimeImmutable
+    public function getDtedeb(): ?DateTimeImmutable
     {
         return $this->dtedeb;
     }
 
-    public function setDtedeb(?\DateTimeImmutable $dtedeb): static
+    public function setDtedeb(?DateTimeImmutable $dtedeb): static
     {
         $this->dtedeb = $dtedeb;
 
@@ -130,36 +131,36 @@ class PersonnelDoc
         return $this;
     }
 
-    public function getDtefin(): ?\DateTimeImmutable
+    public function getDtefin(): ?DateTimeImmutable
     {
         return $this->dtefin;
     }
 
-    public function setDtefin(?\DateTimeImmutable $dtefin): static
+    public function setDtefin(?DateTimeImmutable $dtefin): static
     {
         $this->dtefin = $dtefin;
 
         return $this;
     }
 
-    public function getDtecreation(): ?\DateTimeImmutable
+    public function getDtecreation(): ?DateTimeImmutable
     {
         return $this->dtecreation;
     }
 
-    public function setDtecreation(\DateTimeImmutable $dtecreation): static
+    public function setDtecreation(DateTimeImmutable $dtecreation): static
     {
         $this->dtecreation = $dtecreation;
 
         return $this;
     }
 
-    public function getDtemodif(): ?\DateTimeImmutable
+    public function getDtemodif(): ?DateTimeImmutable
     {
         return $this->dtemodif;
     }
 
-    public function setDtemodif(?\DateTimeImmutable $dtemodif): static
+    public function setDtemodif(?DateTimeImmutable $dtemodif): static
     {
         $this->dtemodif = $dtemodif;
 
