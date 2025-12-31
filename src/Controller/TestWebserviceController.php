@@ -7,6 +7,10 @@ use App\Service\UserSynchronizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< Updated upstream
+=======
+use Throwable;
+>>>>>>> Stashed changes
 
 class TestWebserviceController extends AbstractController
 {
@@ -17,7 +21,6 @@ class TestWebserviceController extends AbstractController
     ): JsonResponse
     {
         $username = $_ENV['SSO_DEV_USER'] ?? 'lfournier';
-        dump('Start of the process', $username); // <-- Ajoute ça ici
 
         try {
             $data = $ws->fetchUserData($username);
@@ -31,7 +34,7 @@ class TestWebserviceController extends AbstractController
                 'site' => $user->getSite(),
                 'service' => $user->getService(),
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return $this->json([
                 'status' => 'ERROR',
                 'message' => $e->getMessage()

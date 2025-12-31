@@ -34,7 +34,11 @@ class PersonnelDoc
     private ?DateTimeImmutable $dtefin = null;
 
     #[ORM\Column]
+<<<<<<< Updated upstream
     private ?DateTimeImmutable $dtecreation;
+=======
+    private ?DateTimeImmutable $dtecreation = null;
+>>>>>>> Stashed changes
 
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $dtemodif = null;

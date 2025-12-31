@@ -3,23 +3,33 @@
 namespace App\Service;
 
 use App\Entity\User;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use RuntimeException;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class UserSynchronizer
 {
-    public function __construct(
-        private EntityManagerInterface $em,
-        private SerializerInterface $serializer
-    ) {}
+    private SerializerInterface $serializer;
 
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        SerializerInterface             $serializer
+    ) {
+        $this->serializer = $serializer;
+    }
+
+    /**
+     * @throws Exception
+     */
     public function sync(string $username, array $wsData): User
     {
         $repo = $this->em->getRepository(User::class);
         $user = $repo->findOneBy(['compteinfo' => $username]) ?? new User($username);
 
         // Hash
-        $externalHash = hash('sha256', json_encode($wsData));
+        $externalHash = hash('sha256', data: json_encode($wsData, JSON_THROW_ON_ERROR));
 
 
         if ($user->getExternalHash() !== $externalHash) {
@@ -96,8 +106,8 @@ class UserSynchronizer
                 // dates
                 if ($wsKey === 'dtenai' && !empty($value)) {
                     try {
-                        $cleanData[$entityField] = (new \DateTime($value))->format('Y-m-d');
-                    } catch (\Exception $e) {
+                        $cleanData[$entityField] = (new DateTime($value))->format('Y-m-d');
+                    } catch (Exception) {
                         $cleanData[$entityField] = null;
                     }
                     continue;
@@ -107,9 +117,9 @@ class UserSynchronizer
                 $cleanData[$entityField] = $value;
             }
 
-            // Sécuriser le remplissage de champ critique (ex: nomusu)
+            // Sécuriser le remplissage de champ critique (exemple nomusu)
             if (empty($cleanData['nomusu'])) {
-                throw new \Exception("ERREUR : 'nomusu' est vide après mapping AGDUC");
+                throw new RuntimeException("ERREUR : 'nomusu' est vide après mapping AGDUC");
             }
 
             // Username obligatoire pour Symfony + DB
