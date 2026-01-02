@@ -38,8 +38,13 @@ class DocumentSynchronizerTest extends TestCase
             ['ID' => 10, 'LIBELLE' => 'Contrat'],
         ];
 
-        $this->ws->method('fetchDocuments')->with($codagt)->willReturn($wsDocs);
-        $this->repository->method('findBy')->willReturn([]);
+        $this->ws->method('fetchDocuments')
+            ->with($codagt)
+            ->willReturn($wsDocs);
+
+        $this->repository->method('findBy')
+            ->with(['codagt' => $codagt])
+            ->willReturn([]);
 
         $this->em->expects($this->once())->method('persist');
         $this->em->expects($this->once())->method('flush');
@@ -58,11 +63,17 @@ class DocumentSynchronizerTest extends TestCase
         $hash = hash('sha256', json_encode($row));
 
         $doc = new PersonnelDoc();
-        $doc->setId(10);
+        $doc->setIDDOC(10);
+        $doc->setCodagt($codagt);
         $doc->setExternalHash($hash);
 
-        $this->ws->method('fetchDocuments')->willReturn([$row]);
-        $this->repository->method('findBy')->willReturn([$doc]);
+        $this->ws->method('fetchDocuments')
+            ->with($codagt)
+            ->willReturn([$row]);
+
+        $this->repository->method('findBy')
+            ->with(['codagt' => $codagt])
+            ->willReturn([$doc]);
 
         $this->em->expects($this->never())->method('persist');
         $this->em->expects($this->never())->method('remove');
@@ -81,11 +92,17 @@ class DocumentSynchronizerTest extends TestCase
         $row = ['ID' => 10, 'LIBELLE' => 'Contrat MAJ'];
 
         $doc = new PersonnelDoc();
-        $doc->setId(10);
+        $doc->setIDDOC(10);
+        $doc->setCodagt($codagt);
         $doc->setExternalHash('OLD_HASH');
 
-        $this->ws->method('fetchDocuments')->willReturn([$row]);
-        $this->repository->method('findBy')->willReturn([$doc]);
+        $this->ws->method('fetchDocuments')
+            ->with($codagt)
+            ->willReturn([$row]);
+
+        $this->repository->method('findBy')
+            ->with(['codagt' => $codagt])
+            ->willReturn([$doc]);
 
         $this->em->expects($this->never())->method('persist');
         $this->em->expects($this->once())->method('flush');
@@ -103,12 +120,21 @@ class DocumentSynchronizerTest extends TestCase
         $codagt = 'AG123';
 
         $doc = new PersonnelDoc();
-        $doc->setId(99);
+        $doc->setIDDOC(99);
+        $doc->setCodagt($codagt);
 
-        $this->ws->method('fetchDocuments')->willReturn([]);
-        $this->repository->method('findBy')->willReturn([$doc]);
+        $this->ws->method('fetchDocuments')
+            ->with($codagt)
+            ->willReturn([]);
 
-        $this->em->expects($this->once())->method('remove')->with($doc);
+        $this->repository->method('findBy')
+            ->with(['codagt' => $codagt])
+            ->willReturn([$doc]);
+
+        $this->em->expects($this->once())
+            ->method('remove')
+            ->with($doc);
+
         $this->em->expects($this->once())->method('flush');
 
         $serializer = new Serializer([new ObjectNormalizer()]);

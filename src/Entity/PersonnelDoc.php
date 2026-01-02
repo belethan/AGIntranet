@@ -34,12 +34,8 @@ class PersonnelDoc
     private ?DateTimeImmutable $dtefin = null;
 
     #[ORM\Column]
-<<<<<<< Updated upstream
-    private ?DateTimeImmutable $dtecreation;
-=======
-    private ?DateTimeImmutable $dtecreation = null;
->>>>>>> Stashed changes
 
+    private ?DateTimeImmutable $dtecreation = null;
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $dtemodif = null;
 
@@ -54,6 +50,10 @@ class PersonnelDoc
 
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $flag_ligne;
+
+    #[ORM\Column(name: 'external_hash', length: 255, nullable: true)]
+    private ?string $externalHash = null;
+
 
 
     public function __construct()
@@ -219,7 +219,34 @@ class PersonnelDoc
         return $this;
     }
 
-    public function setExternalHash(string $externalHash)
+    public function getExternalHash(): ?string
     {
+        return $this->externalHash;
     }
+
+    public function setExternalHash(?string $externalHash): self
+    {
+        $this->externalHash = $externalHash;
+
+        return $this;
+    }
+
+    public function computeExternalHash(): string
+    {
+        $data = [
+            'codagt'      => $this->codagt,
+            'IDDOC'       => $this->IDDOC,
+            'doc_ref'     => $this->doc_ref,
+            'dtedeb'      => $this->dtedeb?->format('Y-m-d'),
+            'dtefin'      => $this->dtefin?->format('Y-m-d'),
+            'flag_actif'  => $this->flag_actif,
+            'libtype'     => $this->libtype,
+            'flag_ligne'  => $this->flag_ligne,
+        ];
+
+        return hash('sha256', json_encode($data, JSON_THROW_ON_ERROR));
+    }
+
+
+
 }

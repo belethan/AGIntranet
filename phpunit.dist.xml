@@ -11,27 +11,46 @@
          cacheDirectory=".phpunit.cache"
 >
     <php>
-        <ini name="display_errors" value="1" />
-        <ini name="error_reporting" value="-1" />
-        <server name="APP_ENV" value="test" force="true" />
-        <server name="SHELL_VERBOSITY" value="-1" />
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="-1"/>
+
+        <server name="APP_ENV" value="test" force="true"/>
+        <server name="SHELL_VERBOSITY" value="-1"/>
+
+        <server name="KERNEL_CLASS" value="App\Kernel"/>
+        <server name="DATABASE_URL" value="mysql://admludo:Coqwheel!9729@127.0.0.1:3306/agintranet_test"/>
+
     </php>
 
     <testsuites>
         <testsuite name="Project Test Suite">
-            <directory>tests</directory>
+            <directory>tests/Entity</directory>
+            <directory>tests/Service</directory>
         </testsuite>
     </testsuites>
 
+    <!--
+        Configuration de la couverture de code
+        PHPUnit >= 10 utilise <source> (et non plus <coverage>)
+    -->
     <source ignoreSuppressionOfDeprecations="true"
             ignoreIndirectDeprecations="true"
             restrictNotices="true"
             restrictWarnings="true"
     >
+        <!-- Code analysé -->
         <include>
             <directory>src</directory>
         </include>
 
+        <!-- Code exclu de la couverture (non métier) -->
+        <exclude>
+            <file>src/Kernel.php</file>
+            <directory>src/DependencyInjection</directory>
+            <directory>src/Migrations</directory>
+        </exclude>
+
+        <!-- Gestion des dépréciations Doctrine -->
         <deprecationTrigger>
             <method>Doctrine\Deprecations\Deprecation::trigger</method>
             <method>Doctrine\Deprecations\Deprecation::delegateTriggerToBackend</method>

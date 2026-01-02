@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use App\Entity\PersonnelDoc;
@@ -20,6 +22,12 @@ class DocumentSynchronizer
     ) {}
 
     /**
+     * Synchronise les documents Oracle vers MySQL pour un agent donné.
+     *
+     * Règle clé :
+     *  - WS.ID  => PersonnelDoc::IDDOC (clé métier)
+     *  - Doctrine gère seul PersonnelDoc::id (clé technique)
+     *
      * @throws RedirectionExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
@@ -28,40 +36,51 @@ class DocumentSynchronizer
      */
     public function sync(string $codagt): void
     {
-        // 1) Documents depuis Oracle
+        // 1) Documents Oracle (source de vérité)
         $wsDocs = $this->documentWebservice->fetchDocuments($codagt);
 
-        // 2) Documents déjà en base pour cet agent
+        // 2) Documents existants en base pour l’agent
         $repo   = $this->em->getRepository(PersonnelDoc::class);
         $dbDocs = $repo->findBy(['codagt' => $codagt]);
 
-        // Index MySQL → par ID (clé technique = ID)
+        /**
+         * Index MySQL par IDDOC (clé métier)
+         * [
+         *   IDDOC => PersonnelDoc
+         * ]
+         */
         $dbIndex = [];
         foreach ($dbDocs as $doc) {
-            $dbIndex[$doc->getId()] = $doc;
+            if ($doc->getIDDOC() !== null) {
+                $dbIndex[$doc->getIDDOC()] = $doc;
+            }
         }
 
         // 3) Synchronisation WS → MySQL
         foreach ($wsDocs as $row) {
 
-            // ID depuis Oracle
-            $id = isset($row['ID']) && $row['ID'] !== '' ? (int)$row['ID'] : null;
+            // IDDOC Oracle
+            $iddoc = isset($row['ID']) && $row['ID'] !== ''
+                ? (int) $row['ID']
+                : null;
 
-            // hash Oracle
-            $externalHash = hash('sha256', json_encode($row));
+            // Hash externe (état fonctionnel du document)
+            $externalHash = hash('sha256', json_encode($row, JSON_THROW_ON_ERROR));
 
-            // === CAS 1 : Document déjà existant (mise à jour potentielle)
-            if ($id !== null && isset($dbIndex[$id])) {
+            /**
+             * === CAS 1 : Document existant → mise à jour éventuelle
+             */
+            if ($iddoc !== null && isset($dbIndex[$iddoc])) {
 
-                $doc = $dbIndex[$id];
+                $doc = $dbIndex[$iddoc];
 
-                // Hash identique → rien
+                // Hash identique → aucune action
                 if ($doc->getExternalHash() === $externalHash) {
-                    unset($dbIndex[$id]);
+                    unset($dbIndex[$iddoc]);
                     continue;
                 }
 
-                // Mise à jour via dénormalisation directe
+                // Mise à jour par dénormalisation
                 $this->serializer->denormalize(
                     $row,
                     PersonnelDoc::class,
@@ -70,21 +89,25 @@ class DocumentSynchronizer
                 );
 
                 $doc->setExternalHash($externalHash);
-                unset($dbIndex[$id]);
+
+                unset($dbIndex[$iddoc]);
                 continue;
             }
 
-            // === CAS 2 : Nouveau document Oracle (pas d'ID fourni ou inconnue en BDD)
+            /**
+             * === CAS 2 : Nouveau document Oracle
+             */
             $doc = new PersonnelDoc();
 
-            // Si ID absent dans WS → appel DOCKEY
-            if ($id === null) {
-                $id = $this->documentWebservice->fetchNewDocId();
+            // Si IDDOC absent → génération via WS
+            if ($iddoc === null) {
+                $iddoc = $this->documentWebservice->fetchNewDocId();
             }
 
-            $doc->setId($id);
+            $doc->setIDDOC($iddoc);
+            $doc->setCodagt($codagt);
 
-            // Dénormalisation automatique
+            // Hydratation
             $this->serializer->denormalize(
                 $row,
                 PersonnelDoc::class,
@@ -92,20 +115,21 @@ class DocumentSynchronizer
                 ['object_to_populate' => $doc]
             );
 
-            $doc->setCodagt($codagt); // important
             $doc->setExternalHash($externalHash);
 
             $this->em->persist($doc);
         }
 
-        // 4) Suppression des documents présents en BDD mais absents du WS
+        /**
+         * 4) Suppression :
+         * Tous les documents restants dans $dbIndex
+         * sont absents du WS → suppression MySQL
+         */
         foreach ($dbIndex as $docToRemove) {
             $this->em->remove($docToRemove);
         }
 
-        // 5) Flush final
+        // 5) Flush unique
         $this->em->flush();
     }
-
 }
-

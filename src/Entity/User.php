@@ -136,7 +136,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(name: 'compte_info', length: 50, nullable: true)]
-    private ?string $compteinfo = null;
+    private ?string $compteInfo = null;
 
     #[ORM\Column(length: 180, unique: true)]
     private ?string $username = null;
@@ -145,7 +145,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct(string $username = '')
     {
         if ($username !== '') {
-            $this->compteinfo = $username;
+            $this->compteInfo = $username;
         }
 
         $this->roles = ['ROLE_USER'];
@@ -327,12 +327,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getCompteinfo(): ?string
     {
-        return $this->compteinfo;
+        return $this->compteInfo;
     }
 
-    public function setCompteinfo(string $compteinfo): static
+    public function setCompteinfo(string $compteInfo): static
     {
-        $this->compteinfo = $compteinfo;
+        $this->compteInfo = $compteInfo;
 
         return $this;
     }
