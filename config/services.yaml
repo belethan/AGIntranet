@@ -1,41 +1,62 @@
 # This file is the entry point to configure your own services.
 
 parameters:
-    # Webservice AGDUC (valeurs définies dans .env / .env.test)
+    # ==========================================================
+    # WEBSERVICE AGDUC – Configuration centrale
+    # ==========================================================
     ws_host: '%env(WEBSERVICE_HOST)%'
     ws_basepath: '%env(WEBSERVICE_BASEPATH)%'
     ws_basic: '%env(WEBSERVICE_BASIC)%'
-    ws_ignore_ssl: '%env(AGDUC_IGNORE_SSL)%'
-
+    ws_ignore_ssl: '%env(bool:AGDUC_IGNORE_SSL)%'
 
 services:
-    # Configuration par défaut
+    # ----------------------------------------------------------
+    # Configuration par défaut des services
+    # ----------------------------------------------------------
     _defaults:
         autowire: true
         autoconfigure: true
 
-    # Toutes les classes de src/ sont automatiquement enregistrées
+    # ----------------------------------------------------------
+    # Auto-enregistrement des services applicatifs
+    # ----------------------------------------------------------
     App\:
         resource: '../src/'
         exclude:
             - '../src/Kernel.php'
 
-
-    # ================================
-    #   CLIENT HTTP POUR AGDUC
-    # ================================
-    webservice.client:
-        class: Symfony\Component\HttpClient\HttpClient
+    # ----------------------------------------------------------
+    # Client HTTP Symfony (instance unique partagée)
+    # ----------------------------------------------------------
+    Symfony\Contracts\HttpClient\HttpClientInterface:
         factory: ['Symfony\Component\HttpClient\HttpClient', 'create']
 
-
-    # ================================
-    #   USER INFO WEBSERVICE
-    # ================================
+    # ----------------------------------------------------------
+    # USER INFO WEBSERVICE (AUTH / LOGIN / MLOGIN)
+    # ----------------------------------------------------------
     App\Service\UserInfoWebservice:
         arguments:
-            $webClient: '@http_client'
+            $webClient: '@Symfony\Contracts\HttpClient\HttpClientInterface'
             $wsHost: '%ws_host%'
             $wsBasePath: '%ws_basepath%'
             $wsBasic: '%ws_basic%'
             $ignoreSsl: '%ws_ignore_ssl%'
+
+    # ----------------------------------------------------------
+    # DOCUMENT WEBSERVICE (DOC / DOC/FICHIER / DOCKEY)
+    # ----------------------------------------------------------
+    App\Service\DocumentWebservice:
+        arguments:
+            $webClient: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+            $wsHost: '%ws_host%'
+            $wsBasePath: '%ws_basepath%'
+            $wsBasic: '%ws_basic%'
+            $ignoreSsl: '%ws_ignore_ssl%'
+
+    # ----------------------------------------------------------
+    # Alias explicite pour injection par interface
+    # (OBLIGATOIRE pour les tests et le respect SOLID)
+    # ----------------------------------------------------------
+    App\Service\DocumentWebserviceInterface:
+        alias: App\Service\DocumentWebservice
+        public: false

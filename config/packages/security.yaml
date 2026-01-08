@@ -1,32 +1,28 @@
 security:
 
     # =====================================================================
-    #  PASSWORD HASHERS
+    # PASSWORD HASHERS
     # =====================================================================
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: auto
 
     # =====================================================================
-    #  USER PROVIDERS
+    # USER PROVIDERS
     # =====================================================================
     providers:
 
-        # Provider SSO (Kerberos / WS / AGDUC)
-        sso_provider:
-            id: App\Security\SsoUserProvider
-
-        # Provider login manuel (BDD)
+        # Provider Doctrine (BDD) — utilisé pour refreshUser()
         app_user_provider:
             entity:
                 class: App\Entity\User
                 property: email
 
     # =====================================================================
-    #  FIREWALLS
+    # FIREWALLS
     # =====================================================================
     firewalls:
 
-        # Désactivation sécurité pour les assets & debug
+        # Désactivation sécurité pour assets & debug
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
@@ -35,23 +31,22 @@ security:
         main:
             lazy: true
 
-            # Provider principal = SSO
-            provider: sso_provider
+            # Provider Doctrine (le SSO ne passe PAS par un provider)
+            provider: app_user_provider
 
-            # Authentificateur SSO
+            # Authenticator SSO
             custom_authenticators:
                 - App\Security\SsoAuthenticator
 
-            # Login manuel (fallback)
+            # Fallback login manuel (si SSO indisponible)
             form_login:
                 login_path: app_login
                 check_path: app_login
                 provider: app_user_provider
                 username_parameter: username
                 password_parameter: password
-                default_target_path: /
 
-            # Entry point SSO
+            # Point d’entrée SSO
             entry_point: App\Security\SsoEntryPoint
 
             logout:
@@ -61,14 +56,15 @@ security:
             stateless: false
 
     # =====================================================================
-    #  ACCESS CONTROL
+    # ACCESS CONTROL
     # =====================================================================
     access_control:
-        # Page de login accessible à tous
+
+        # Login accessible à tous
         - { path: ^/login, roles: PUBLIC_ACCESS }
 
-        # Accès admin
+        # Admin
         - { path: ^/admin, roles: ROLE_ADMIN }
 
-        # Toute autre page nécessite un user authentifié
+        # Toute autre page = utilisateur authentifié
         - { path: ^/, roles: ROLE_USER }

@@ -9,6 +9,7 @@ use App\Service\UserSynchronizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -16,13 +17,16 @@ class UserSynchronizerTest extends TestCase
 {
     private EntityManagerInterface $em;
     private EntityRepository $repository;
+    private LoggerInterface $logger;
 
     protected function setUp(): void
     {
         $this->em = $this->createMock(EntityManagerInterface::class);
         $this->repository = $this->createMock(EntityRepository::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
 
-        $this->em->method('getRepository')
+        $this->em
+            ->method('getRepository')
             ->with(User::class)
             ->willReturn($this->repository);
     }
@@ -32,27 +36,33 @@ class UserSynchronizerTest extends TestCase
         $username = 'jdupont';
 
         $wsData = [
+            'codagt' => 'AG123',
             'nomusu' => 'DUPONT',
             'prenom' => 'Jean',
-            'mail' => 'jdupont@test.fr',
-            'codagt' => 'AG123',
-            'compte_info' => $username,
         ];
 
-        $this->repository->method('findOneBy')->willReturn(null);
+        $this->repository
+            ->method('findOneBy')
+            ->with(['codagt' => 'AG123'])
+            ->willReturn(null);
 
         $this->em->expects($this->once())->method('persist');
         $this->em->expects($this->once())->method('flush');
 
-        // ✅ VRAI serializer (simple, fiable)
+        // ✅ Vrai serializer qui sait denormalize()
         $serializer = new Serializer([new ObjectNormalizer()]);
 
-        $synchronizer = new UserSynchronizer($this->em, $serializer);
+        $sync = new UserSynchronizer(
+            $this->em,
+            $serializer,
+            $this->logger
+        );
 
-        $user = $synchronizer->sync($username, $wsData);
+        $user = $sync->sync($username, $wsData);
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertSame($username, $user->getUsername());
+        $this->assertSame('AG123', $user->getCodagt());
         $this->assertNotNull($user->getExternalHash());
     }
 
@@ -61,41 +71,68 @@ class UserSynchronizerTest extends TestCase
         $username = 'jdupont';
 
         $wsData = [
+            'codagt' => 'AG123',
             'nomusu' => 'DUPONT',
-            'prenom' => 'Jean',
         ];
 
-        $existingUser = new User($username);
-        $existingUser->setExternalHash(
-            hash('sha256', json_encode($wsData, JSON_THROW_ON_ERROR))
-        );
+        // ⚠️ Doit reproduire exactement la logique du service (ksort avant hash)
+        $sorted = $wsData;
+        ksort($sorted);
+        $hash = hash('sha256', json_encode($sorted, JSON_THROW_ON_ERROR));
 
-        $this->repository->method('findOneBy')->willReturn($existingUser);
+        $existingUser = new User($username);
+        $existingUser->setCodagt('AG123');
+        $existingUser->setExternalHash($hash);
+
+        $this->repository
+            ->method('findOneBy')
+            ->with(['codagt' => 'AG123'])
+            ->willReturn($existingUser);
 
         $this->em->expects($this->never())->method('persist');
-        $this->em->expects($this->once())->method('flush');
+        $this->em->expects($this->never())->method('flush');
 
         $serializer = new Serializer([new ObjectNormalizer()]);
-        $synchronizer = new UserSynchronizer($this->em, $serializer);
 
-        $user = $synchronizer->sync($username, $wsData);
+        $sync = new UserSynchronizer(
+            $this->em,
+            $serializer,
+            $this->logger
+        );
+
+        $user = $sync->sync($username, $wsData);
 
         $this->assertSame($existingUser, $user);
     }
 
     public function testSyncThrowsExceptionIfNomusuIsMissing(): void
     {
-        $this->repository->method('findOneBy')->willReturn(null);
+        $username = 'jdupont';
 
         $wsData = [
+            'codagt' => 'AG123',
             'prenom' => 'Jean',
         ];
 
+        $this->repository
+            ->method('findOneBy')
+            ->with(['codagt' => 'AG123'])
+            ->willReturn(null);
+
+        // On ne doit pas écrire en base
+        $this->em->expects($this->never())->method('persist');
+        $this->em->expects($this->never())->method('flush');
+
         $serializer = new Serializer([new ObjectNormalizer()]);
-        $synchronizer = new UserSynchronizer($this->em, $serializer);
+
+        $sync = new UserSynchronizer(
+            $this->em,
+            $serializer,
+            $this->logger
+        );
 
         $this->expectException(\RuntimeException::class);
 
-        $synchronizer->sync('jdupont', $wsData);
+        $sync->sync($username, $wsData);
     }
 }

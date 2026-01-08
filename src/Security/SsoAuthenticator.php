@@ -2,23 +2,22 @@
 
 namespace App\Security;
 
+use App\Entity\User;
+use App\Service\DocumentSynchronizer;
 use App\Service\UserInfoWebservice;
 use App\Service\UserSynchronizer;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
-use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 final class SsoAuthenticator extends AbstractAuthenticator
 {
@@ -26,68 +25,94 @@ final class SsoAuthenticator extends AbstractAuthenticator
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly UserInfoWebservice    $userInfoWebservice,
         private readonly UserSynchronizer      $userSynchronizer,
-        private readonly SsoUserProvider       $userProvider, // ✅ SERVICE CONCRET
+        private readonly DocumentSynchronizer  $documentSynchronizer,
+
+        #[Autowire(service: 'monolog.logger.sso')]
+        private readonly LoggerInterface $ssoLogger,
+
+        #[Autowire(service: 'monolog.logger.agduc')]
+        private readonly LoggerInterface $agducLogger,
     ) {}
 
-    public function supports(Request $request): ?bool
+    public function supports(Request $request): bool
     {
-        if (in_array($request->getPathInfo(), [
+        return !in_array($request->getPathInfo(), [
             '/login',
-            '/test-ws',
+            '/logout',
             '/test-env',
-        ], true)) {
-            return false;
-        }
-
-        return true;
+        ], true);
     }
 
     public function authenticate(Request $request): Passport
     {
         $username = $this->extractSsoUsername($request);
 
-        file_put_contents(
-            dirname(__DIR__, 2).'/var/log/sso.log',
-            sprintf("[%s] USERNAME SSO = %s\n", date('Y-m-d H:i:s'), var_export($username, true)),
-            FILE_APPEND
-        );
-
         if (!$username) {
-            throw new AuthenticationException('Impossible de déterminer l’utilisateur SSO.');
+            $this->ssoLogger->warning('SSO – utilisateur non détecté');
+            throw new AuthenticationException('Authentification SSO requise');
         }
 
-        if (!$username) {
-            throw new AuthenticationException('Impossible de déterminer l’utilisateur SSO.');
-        }
+        $this->ssoLogger->info('SSO – utilisateur détecté', [
+            'username' => $username,
+        ]);
 
         return new SelfValidatingPassport(
             new UserBadge(
                 $username,
-                fn (string $identifier) => $this->userProvider->loadUserByIdentifier($identifier)
+                function (string $identifier): User {
+
+                    // ============================
+                    // 1) WS Oracle USER
+                    // ============================
+                    $this->agducLogger->info('AGDUC – appel WS USER', [
+                        'username' => $identifier,
+                    ]);
+
+                    $wsData = $this->userInfoWebservice->fetchUserData($identifier);
+
+                    // ============================
+                    // 2) Synchronisation USER
+                    // ============================
+                    $user = $this->userSynchronizer->sync($identifier, $wsData);
+
+                    $this->agducLogger->info('AGDUC – utilisateur synchronisé', [
+                        'username' => $identifier,
+                        'user_id'  => $user->getId(),
+                        'codagt'   => $user->getCodagt(),
+                    ]);
+
+                    // ============================
+                    // 3) Synchronisation DOCUMENTS (dry-run)
+                    // ============================
+                    if ($user->getCodagt()) {
+                        $docResult = $this->documentSynchronizer
+                            ->syncForUser($user->getCodagt(), true);
+
+                        $this->agducLogger->info('AGDUC – documents (dry-run)', [
+                            'username' => $identifier,
+                            'codagt'   => $user->getCodagt(),
+                            'total'    => $docResult->getTotal(),
+                            'created'  => $docResult->getCreated(),
+                            'updated'  => $docResult->getUpdated(),
+                            'ignored'  => $docResult->getIgnored(),
+                        ]);
+                    }
+
+                    return $user;
+                }
             )
         );
     }
 
-    /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
-     */
     public function onAuthenticationSuccess(
         Request $request,
         TokenInterface $token,
         string $firewallName
     ): ?Response {
-        $username = $token->getUserIdentifier();
+        $this->ssoLogger->info('SSO – authentification réussie', [
+            'username' => $token->getUserIdentifier(),
+        ]);
 
-        $wsData = $this->userInfoWebservice->fetchUserData($username);
-        $user   = $this->userSynchronizer->sync($username, $wsData);
-
-        $token->setUser($user);
-
-        // Laisser Symfony continuer la requête normalement
         return null;
     }
 
@@ -95,32 +120,60 @@ final class SsoAuthenticator extends AbstractAuthenticator
         Request $request,
         AuthenticationException $exception
     ): ?Response {
+        $this->ssoLogger->error('SSO – authentification échouée', [
+            'message' => $exception->getMessage(),
+        ]);
+
         return new RedirectResponse($this->urlGenerator->generate('app_login'));
     }
 
+    /**
+     * 🔐 Extraction USER SSO
+     * - PROD : REMOTE_USER
+     * - DEV  : Header X-DEV-USER
+     */
     private function extractSsoUsername(Request $request): ?string
     {
-        $mode = $request->server->get('SSO_MODE')
-            ?? getenv('SSO_MODE')
-            ?? $_ENV['SSO_MODE']
-            ?? 'prod';
+        $env  = $_ENV['APP_ENV'] ?? 'prod';
+        $mode = $_ENV['SSO_MODE'] ?? 'prod';
 
-        if ($mode === 'dev') {
-            return strtolower(
-                $request->server->get('SSO_DEV_USER')
-                ?? getenv('SSO_DEV_USER')
-                ?? 'lcoquemert'
-            );
-        }
-
+        // ============================
+        // 1) PROD — vrai SSO
+        // ============================
         $username =
             $request->server->get('REMOTE_USER')
             ?? $request->server->get('REDIRECT_REMOTE_USER');
 
-        if (!$username) {
-            return null;
+        if ($username) {
+            return $this->normalizeUsername($username);
         }
 
+        // ============================
+        // 2) DEV — header contrôlé
+        // ============================
+        if ($env === 'dev' || $mode === 'dev') {
+            $headerUser = $request->headers->get('X-DEV-USER');
+
+            if ($headerUser) {
+                $this->ssoLogger->info('SSO DEV – utilisateur via header', [
+                    'username' => $headerUser,
+                ]);
+
+                return strtolower(trim($headerUser));
+            }
+
+            // fallback env
+            $envUser = $_ENV['SSO_DEV_USER'] ?? null;
+            if ($envUser) {
+                return strtolower(trim($envUser));
+            }
+        }
+
+        return null;
+    }
+
+    private function normalizeUsername(string $username): string
+    {
         if (str_contains($username, '\\')) {
             $username = substr($username, strrpos($username, '\\') + 1);
         }
