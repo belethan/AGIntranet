@@ -6,22 +6,26 @@ use App\Entity\User;
 
 final class UserFactory
 {
-    public static function createValid(): User
-    {
-        $user = new User();
+    /**
+     * Crée un utilisateur valide pour les tests Repository
+     */
+    public static function createValid(
+        string $username = 'test.user',
+        string $codagt = '9000'
+    ): User {
+        // Le constructeur initialise username, compteInfo, roles, compte_actif
+        $user = new User($username);
 
-        // Identifiant Symfony
-        $user->setUsername('test.user');
+        // Champs STRICTEMENT obligatoires et disponibles
+        $user
+            ->setCodagt($codagt)
+            ->setNomusu('TEST')
+            ->setPrenom('User');
 
-        // Champs NOT NULL en base
-        $user->setNomusu('TEST');
-        $user->setPrenom('User');
-        $user->setSexe(1);
-        $user->setCompteActif(1);
-        $user->setComnai('FR');
-        $user->setCodagt('9000');
-        // Champs facultatifs
-        $user->setMail('test.user@test.fr');
+        // Hash externe (utilisé par la logique métier)
+        $user->setExternalHash(
+            hash('sha256', $username . '|' . $codagt)
+        );
 
         return $user;
     }
