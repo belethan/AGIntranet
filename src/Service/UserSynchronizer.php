@@ -97,11 +97,26 @@ final class UserSynchronizer
             'numrue'  => 'numrue',
 
             // responsable
-            'codagtResponsable'   => 'codagtResponsable',
-            'nomResponsable'      => 'nomResponsable',
-            'prenomResponsable'   => 'prenomResponsable',
-            'mailResponsable'     => 'mailResponsable',
-            'siteresp'            => 'siteresp',
+            'codagtResponsable' => 'codagtResponsable',
+            'nomResponsable'    => 'nomResponsable',
+            'prenomResponsable' => 'prenomResponsable',
+            'mailResponsable'   => 'mailResponsable',
+            'siteresp'          => 'siteresp',
+        ];
+
+        // Champs WS numériques → string en DB
+        $stringFields = [
+            'teleph',
+            'telpro',
+            'telport',
+            'telportpro',
+            'notel',
+            'telacc',
+            'telportacc',
+            'codpos',
+            'codpay',
+            'numrue',
+            'codagtResponsable',
         ];
 
         $cleanData = [];
@@ -113,9 +128,22 @@ final class UserSynchronizer
 
             $value = $wsData[$wsKey];
 
-            // normalisation valeurs vides
-            if ($value === '' || $value === '0') {
-                $value = null;
+            // valeur vide
+            if ($value === '' || $value === null) {
+                $cleanData[$entityField] = null;
+                continue;
+            }
+
+            // cast string obligatoire
+            if (in_array($wsKey, $stringFields, true)) {
+                $cleanData[$entityField] = (string) $value;
+                continue;
+            }
+
+            // cast int
+            if ($wsKey === 'sexe') {
+                $cleanData[$entityField] = (int) $value;
+                continue;
             }
 
             $cleanData[$entityField] = $value;

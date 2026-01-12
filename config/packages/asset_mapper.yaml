@@ -6,6 +6,8 @@ framework:
 
         # En dev : on veut des erreurs strictes
         missing_import_mode: strict
+        excluded_patterns:
+            - '**/assets/styles/**/_*.scss'
 
 when@prod:
     framework:
