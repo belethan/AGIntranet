@@ -10,22 +10,16 @@
 {% block stylesheets %}
     {{ parent() }}
 
-    {# Bootstrap CSS #}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet"
           crossorigin="anonymous">
 
-    {# Bootstrap Icons #}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
           rel="stylesheet">
 
-    {# CSS Front global #}
     <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
 {% endblock %}
 
-{# ===================== #}
-{#         BODY          #}
-{# ===================== #}
 {% block body %}
 
     <div class="layout">
@@ -43,68 +37,73 @@
                 <span class="logo-accent"></span>
             </div>
 
-            {# --- Menu principal --- #}
+            {# --- Contenu sidebar --- #}
             <div class="sidebar-main">
 
-                <div class="sidebar-section-title d-flex align-items-center">
-                    <span class="section-bar"></span>
-                    <span class="section-title">Intranet</span>
+                {# ===== GROUPE INTRANET ===== #}
+                <div class="sidebar-group">
+
+                    <div class="sidebar-section-title d-flex align-items-center">
+                        <span class="section-bar"></span>
+                        <span class="section-title">Intranet</span>
+                    </div>
+
+                    <nav class="sidebar-menu sidebar-menu-intranet">
+
+                        <a href="{{ path('index') }}" class="sidebar-menu-item active">
+                            <i class="bi bi-house-door sidebar-menu-icon"></i>
+                            <span>Espace AGDUC</span>
+                        </a>
+
+                        <a href="#" class="sidebar-menu-item">
+                            <i class="bi bi-journal-text sidebar-menu-icon"></i>
+                            <span>Annuaire</span>
+                        </a>
+
+                        <a href="#" class="sidebar-menu-item">
+                            <i class="bi bi-folder2-open sidebar-menu-icon"></i>
+                            <span>Documents</span>
+                        </a>
+
+                        <a href="#" class="sidebar-menu-item">
+                            <i class="bi bi-newspaper sidebar-menu-icon"></i>
+                            <span>Articles</span>
+                        </a>
+
+                        <a href="#" class="sidebar-menu-item">
+                            <i class="bi bi-people sidebar-menu-icon"></i>
+                            <span>Collaborations</span>
+                        </a>
+
+                        <a href="#" class="sidebar-menu-item">
+                            <i class="bi bi-briefcase sidebar-menu-icon"></i>
+                            <span>Recrutement</span>
+                        </a>
+
+                        <a href="#" class="sidebar-menu-item">
+                            <i class="bi bi-badge-ad sidebar-menu-icon"></i>
+                            <span>Espace employé</span>
+                        </a>
+
+                        <a href="#" class="sidebar-menu-item">
+                            <i class="bi bi-person-vcard sidebar-menu-icon"></i>
+                            <span>Mes informations</span>
+                        </a>
+
+                        <a href="#" class="sidebar-menu-item">
+                            <i class="bi bi-gear sidebar-menu-icon"></i>
+                            <span>Paramètres</span>
+                        </a>
+
+                    </nav>
                 </div>
-
-                <nav class="sidebar-menu mt-3">
-
-                    <a href="{{ path('index') }}" class="sidebar-menu-item">
-                        <i class="bi bi-house-door sidebar-menu-icon"></i>
-                        <span>Espace AGDUC</span>
-                    </a>
-
-                    <a href="#" class="sidebar-menu-item">
-                        <i class="bi bi-journal-text sidebar-menu-icon"></i>
-                        <span>Annuaire</span>
-                    </a>
-
-                    <a href="#" class="sidebar-menu-item">
-                        <i class="bi bi-folder2-open sidebar-menu-icon"></i>
-                        <span>Documents</span>
-                    </a>
-
-                    <a href="#" class="sidebar-menu-item">
-                        <i class="bi bi-newspaper sidebar-menu-icon"></i>
-                        <span>Articles</span>
-                    </a>
-
-                    <a href="#" class="sidebar-menu-item">
-                        <i class="bi bi-people sidebar-menu-icon"></i>
-                        <span>Collaborations</span>
-                    </a>
-
-                    <a href="#" class="sidebar-menu-item">
-                        <i class="bi bi-briefcase sidebar-menu-icon"></i>
-                        <span>Recrutement</span>
-                    </a>
-
-                    <a href="#" class="sidebar-menu-item">
-                        <i class="bi bi-badge-ad sidebar-menu-icon"></i>
-                        <span>Espace employé</span>
-                    </a>
-
-                    <a href="#" class="sidebar-menu-item">
-                        <i class="bi bi-person-vcard sidebar-menu-icon"></i>
-                        <span>Mes informations</span>
-                    </a>
-
-                    <a href="#" class="sidebar-menu-item">
-                        <i class="bi bi-gear sidebar-menu-icon"></i>
-                        <span>Paramètres</span>
-                    </a>
-
-                </nav>
 
             </div>
 
             {# --- Bas sidebar --- #}
             <div class="sidebar-bottom">
-                <a href="{{ path('app_logout') }}" class="d-flex align-items-center gap-2 text-decoration-none">
+                <a href="{{ path('app_logout') }}"
+                   class="d-flex align-items-center gap-2 text-decoration-none">
                     <i class="bi bi-box-arrow-right fs-4"></i>
                     <span>Déconnexion</span>
                 </a>
@@ -117,9 +116,7 @@
         {# ======================== #}
         <div class="topbar-container">
 
-            {# ---------- Header ---------- #}
             <header class="topbar">
-
                 <div class="topbar-left">
                     <p class="p1-bonjour">
                         Bonjour {{ app.user.prenom ?? 'Utilisateur' }},
@@ -129,38 +126,14 @@
                         Dans cet espace vous trouverez toutes les informations récentes de l’AGDUC.
                     </p>
                 </div>
-
-                <div class="topbar-right">
-                    {% block header_actions %}
-                        {# Actions spécifiques par page #}
-                    {% endblock %}
-                </div>
-
             </header>
 
-            {# ---------- Contenu page ---------- #}
             <main class="page-content">
-                {% block front %}
-                    {# Contenu métier des pages #}
-                {% endblock %}
+                {% block front %}{% endblock %}
             </main>
 
         </div>
 
     </div>
 
-{% endblock %}
-
-{# ===================== #}
-{#       SCRIPTS         #}
-{# ===================== #}
-{% block javascripts %}
-    {{ parent() }}
-
-    {# Importmap Symfony #}
-    {{ importmap('app') }}
-
-    {# Bootstrap JS #}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-            crossorigin="anonymous"></script>
 {% endblock %}

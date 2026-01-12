@@ -20,6 +20,18 @@
     border-right: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+/* Groupe de menu Intranet */
+.sidebar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* 👈 padding demandé */
+}
+
+/* Menu juste sous le titre */
+.sidebar-menu-intranet {
+    padding-top: 20px;
+}
+
 /* Bloc top : Logo */
 .sidebar-top {
     display: flex;
@@ -35,7 +47,7 @@
 .sidebar-main {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start; /* clé du fix */
     align-items: flex-start;
     padding: 45px 12px;
     flex: 1 0 0;
