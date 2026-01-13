@@ -12,6 +12,7 @@ security:
     providers:
 
         # Provider Doctrine (BDD) — utilisé pour refreshUser()
+        # IMPORTANT: property doit correspondre au champ utilisé au login (email OU username)
         app_user_provider:
             entity:
                 class: App\Entity\User
@@ -27,26 +28,26 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # Firewall principal (SSO prioritaire)
+        # Firewall principal
         main:
             lazy: true
 
-            # Provider Doctrine (le SSO ne passe PAS par un provider)
             provider: app_user_provider
 
-            # Authenticator SSO
+            # Authenticator SSO (REMOTE_USER + override DEV via session)
             custom_authenticators:
                 - App\Security\SsoAuthenticator
 
-            # Fallback login manuel (si SSO indisponible)
+            # Fallback login manuel
             form_login:
                 login_path: app_login
                 check_path: app_login
                 provider: app_user_provider
                 username_parameter: username
                 password_parameter: password
+                default_target_path: app_home
 
-            # Point d’entrée SSO
+            # Point d’entrée (si non authentifié -> /login)
             entry_point: App\Security\SsoEntryPoint
 
             logout:
@@ -62,6 +63,9 @@ security:
 
         # Login accessible à tous
         - { path: ^/login, roles: PUBLIC_ACCESS }
+
+        # DEV switch accessible à tous (route DEV uniquement de toute façon)
+        - { path: ^/dev/login, roles: PUBLIC_ACCESS }
 
         # Admin
         - { path: ^/admin, roles: ROLE_ADMIN }
