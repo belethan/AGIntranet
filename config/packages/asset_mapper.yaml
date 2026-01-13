@@ -1,11 +1,16 @@
 framework:
     asset_mapper:
-        # The paths to make available to the asset mapper.
+        # Racine unique des assets (recommandé Symfony 7)
         paths:
-            - assets/
+            - assets
+
+        # En dev : on veut des erreurs strictes
         missing_import_mode: strict
+        excluded_patterns:
+            - '**/assets/styles/**/_*.scss'
 
 when@prod:
     framework:
         asset_mapper:
+            # En prod : warning seulement (tolérance)
             missing_import_mode: warn

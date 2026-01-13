@@ -1,0 +1,131 @@
+/* =========================================================
+   MIRBAL – Pages erreur (404 / 403 / 500)
+   Extraction minimale – AGIntranet
+========================================================= */
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f5f6fa;
+}
+
+.auth-bg {
+    background: linear-gradient(135deg, #f6f7fb, #eef1f7);
+}
+
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.py-10 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.px-4 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* =====================
+   Error block
+===================== */
+
+.error_section {
+    max-width: 620px;
+}
+
+.error_title {
+    font-size: 120px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    color: #2d2f4a;
+}
+
+.error_section_subtitle {
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #2d2f4a;
+}
+
+.error_section p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.65);
+    margin-bottom: 2rem;
+}
+
+/* =====================
+   Button (Bootstrap-like)
+===================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 1.4rem;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 6px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background-color: #6c63ff;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #5a52e0;
+}
+
+/* =====================
+   Icons (Remix Icon)
+===================== */
+
+@font-face {
+    font-family: "remixicon";
+    src: url("/assets/fonts/remixicon/fonts/remixicon.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+}
+
+[class^="ri-"], [class*=" ri-"] {
+    font-family: "remixicon" !important;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+}
+
+.ri-home-4-line:before {
+    content: "\ee2d";
+}
+
+.me-2 {
+    margin-right: 0.5rem;
+}

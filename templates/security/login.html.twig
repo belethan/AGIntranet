@@ -1,0 +1,101 @@
+{% extends '../admin/base.html.twig' %}
+
+{% set asset_group = 'auth' %}
+
+{% block title %}Connexion – Intranet AGDUC{% endblock %}
+
+{% block body %}
+    <div class="login-wrapper">
+
+        <div class="login-card">
+
+            {# ===================== #}
+            {# COLONNE GAUCHE : FORM  #}
+            {# ===================== #}
+            <div class="login-left">
+
+                <h1 class="login-title">Se connecter</h1>
+
+                {% if error %}
+                    <div class="alert alert-danger mb-4">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                <form method="post" class="login-form">
+
+                    <input type="hidden"
+                           name="_csrf_token"
+                           value="{{ csrf_token('authenticate') }}">
+
+                    <div class="mb-4">
+                        <label for="username">Identifiant</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            class="login-input"
+                            placeholder="email ou identifiant"
+                            value="{{ last_username }}"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-4 position-relative">
+                        <label for="password">Mot de passe</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="login-input"
+                            placeholder="************"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="login-eye-btn"
+                            aria-label="Afficher ou masquer le mot de passe"
+                            data-toggle-password
+                        >
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        Connexion
+                    </button>
+
+                </form>
+            </div>
+
+            {# ===================== #}
+            {# COLONNE DROITE : BRAND #}
+            {# ===================== #}
+            <div class="login-right">
+
+                <h2 class="login-welcome">
+                    Bienvenue<br>
+                    <span>sur l’intranet</span>
+                </h2>
+
+                <div class="login-right-center">
+                    <img
+                        src="{{ asset('images/static/grandlogoagduc.png') }}"
+                        alt="AGDUC"
+                        class="login-logo"
+                    >
+
+                    <p class="login-chatbot">
+                        CHATBOT (signal ou autre)
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+{% endblock %}

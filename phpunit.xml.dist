@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.4/phpunit.xsd"
+    bootstrap="tests/bootstrap.php"
+    colors="true"
+    cacheDirectory=".phpunit.cache"
+>
+    <!-- ============================= -->
+    <!-- TESTS -->
+    <!-- ============================= -->
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Repository">
+            <directory suffix="Test.php">tests/Repository</directory>
+        </testsuite>
+
+        <testsuite name="Functional">
+            <directory suffix="Test.php">tests/Functional</directory>
+        </testsuite>
+    </testsuites>
+
+    <!-- ============================= -->
+    <!-- CODE COVERAGE -->
+    <!-- ============================= -->
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <report>
+            <html outputDirectory="var/coverage/html"/>
+            <clover outputFile="var/coverage/clover.xml"/>
+        </report>
+    </coverage>
+
+    <!-- ============================= -->
+    <!-- ENV / PHP -->
+    <!-- ============================= -->
+    <php>
+        <!-- Environnement Symfony -->
+        <env name="APP_ENV" value="test"/>
+        <env name="APP_DEBUG" value="1"/>
+        <env name="KERNEL_CLASS" value="App\Kernel"/>
+
+        <!-- Sécurité base & container -->
+        <env name="DEFAULT_URI" value="http://localhost:8000"/>
+
+        <!-- Sécurité / SSO -->
+        <env name="SSO_ENABLED" value="false"/>
+        <env name="KERBEROS_ENABLED" value="false"/>
+
+        <!-- Mail / Async -->
+        <env name="MAILER_DSN" value="null://null"/>
+        <env name="MESSENGER_TRANSPORT_DSN" value="doctrine://default"/>
+
+        <!-- Symfony -->
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
+    </php>
+</phpunit>

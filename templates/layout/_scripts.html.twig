@@ -1,0 +1,10 @@
+{# ============================================================
+   Chargement des scripts JavaScript via ImportMap
+   Entrypoint unique : app
+   ============================================================ #}
+
+{{ importmap('app') }}
+
+{# Bloc optionnel pour scripts spécifiques à une page #}
+{% block page_javascripts %}{% endblock %}
+

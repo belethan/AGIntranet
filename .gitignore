@@ -18,3 +18,16 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+###> symfonycasts/sass-bundle ###
+/public/assets/
+###< symfonycasts/sass-bundle ###
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+
+# Documents locaux
+Documents/

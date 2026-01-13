@@ -1,24 +1,29 @@
 security:
 
     # =====================================================================
-    #  HASHERS
+    # PASSWORD HASHERS
     # =====================================================================
     password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: auto
 
     # =====================================================================
-    #  USER PROVIDER pour SSO
+    # USER PROVIDERS
     # =====================================================================
     providers:
-        sso_provider:
-            id: App\Security\SsoUserProvider
+
+        # Provider Doctrine (BDD) — utilisé pour refreshUser()
+        # IMPORTANT: property doit correspondre au champ utilisé au login (email OU username)
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
 
     # =====================================================================
-    #  FIREWALLS
+    # FIREWALLS
     # =====================================================================
     firewalls:
 
-        # Désactive la sécurité dans l'environnement dev
+        # Désactivation sécurité pour assets & debug
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
@@ -26,36 +31,44 @@ security:
         # Firewall principal
         main:
             lazy: true
-            provider: sso_provider
 
+            provider: app_user_provider
+
+            # Authenticator SSO (REMOTE_USER + override DEV via session)
             custom_authenticators:
                 - App\Security\SsoAuthenticator
 
-            # Quand Symfony doit authentifier quelqu’un, il utilise ton authenticator SSO
-            entry_point: App\Security\SsoAuthenticator
+            # Fallback login manuel
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                provider: app_user_provider
+                username_parameter: username
+                password_parameter: password
+                default_target_path: app_home
+
+            # Point d’entrée (si non authentifié -> /login)
+            entry_point: App\Security\SsoEntryPoint
 
             logout:
                 path: /logout
+                target: /login
 
-            # Pas de stateless → session utilisée
             stateless: false
 
     # =====================================================================
-    #  ACCESS CONTROL
+    # ACCESS CONTROL
     # =====================================================================
     access_control:
+
+        # Login accessible à tous
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+
+        # DEV switch accessible à tous (route DEV uniquement de toute façon)
+        - { path: ^/dev/login, roles: PUBLIC_ACCESS }
+
+        # Admin
         - { path: ^/admin, roles: ROLE_ADMIN }
+
+        # Toute autre page = utilisateur authentifié
         - { path: ^/, roles: ROLE_USER }
-
-
-# =====================================================================
-# CONFIG TEST
-# =====================================================================
-when@test:
-    security:
-        password_hashers:
-            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-                algorithm: auto
-                cost: 4
-                time_cost: 3
-                memory_cost: 10

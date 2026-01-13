@@ -1,0 +1,99 @@
+/* ================================
+   FONTS
+================================ */
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../../fonts/montserrat/Montserrat-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../../fonts/montserrat/Montserrat-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../../fonts/montserrat/Montserrat-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../../fonts/montserrat/Montserrat-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* ================================
+   GLOBAL BODY
+================================ */
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: #F5F6FA;
+    margin: 0;
+    padding: 0;
+}
+
+/* ================================
+   PAGE MAIN CONTAINER (responsive)
+================================ */
+.page-container {
+    width: 100%;
+    max-width: 1708px; /* largeur Figma */
+    min-height: 70vh; /* hauteur flexible */
+
+    margin: 0 auto;
+    padding: 18px;
+
+    border-radius: 18px;
+
+    /* Dégradés Figma */
+    background:
+        radial-gradient(55.14% 51.54% at 60.17% 5.59%, rgba(8, 27, 151, 0.20) 0%, rgba(255, 255, 255, 0.00) 100%),
+        radial-gradient(100.1% 111.29% at -7.35% -14.4%, rgba(108, 36, 171, 0.20) 0%, rgba(241, 241, 241, 0.20) 46.5%),
+        radial-gradient(141.29% 106.34% at 94.75% 115.07%, rgba(108, 36, 171, 0.20) 0%, rgba(241, 241, 241, 0.20) 46.5%),
+        radial-gradient(59.41% 42.56% at 6.44% 84.18%, rgba(41, 8, 151, 0.20) 0%, rgba(255, 255, 255, 0.00) 100%);
+
+    background-blend-mode: normal;
+
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.20);
+    box-sizing: border-box;
+}
+
+/* ================================
+   RESPONSIVE RULES
+================================ */
+
+/* Smartphones */
+@media (max-width: 576px) {
+    .page-container {
+        padding: 12px;
+        border-radius: 12px;
+    }
+}
+
+/* Tablettes */
+@media (max-width: 992px) {
+    .page-container {
+        min-height: auto;
+        padding: 15px;
+    }
+}
+
+/* Extra large (grand écran / desktop Figma) */
+@media (min-width: 1800px) {
+    .page-container {
+        max-width: 1800px; /* légèrement étendu si besoin */
+    }
+}
+
+/* ================================
+   UTILITAIRES GENERAUX
+================================ */
+.center-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

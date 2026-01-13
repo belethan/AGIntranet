@@ -2,69 +2,138 @@
 
 namespace App\Service;
 
+use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-readonly class DocumentWebservice
+final readonly class DocumentWebservice implements DocumentWebserviceInterface
 {
     public function __construct(
         private HttpClientInterface $webClient,
-        private string              $wsBasePath
+        private string $wsHost,
+        private string $wsBasePath,
+        private string $wsBasic,
+        private bool $ignoreSsl
     ) {}
 
     /**
-     * Retourne tous les documents d'un agent.
-     *
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
+     * @return array<int, array<string, mixed>>
      */
     public function fetchDocuments(string $codagt): array
     {
-        $url = sprintf("%s/DOC/%s", $this->wsBasePath, $codagt);
+        $url = rtrim($this->wsHost, '/')
+            . '/'
+            . trim($this->wsBasePath, '/')
+            . '/DOC/'
+            . rawurlencode($codagt);
 
-        $response = $this->webClient->request('GET', $url, [
-            'verify_peer' => false,
-            'verify_host' => false,
-        ]);
+        $response = $this->webClient->request('GET', $url, $this->buildOptions());
 
-        if ($response->getStatusCode() !== 200) {
-            throw new \Exception("Erreur WebService DOC: HTTP " . $response->getStatusCode());
+        if ($response->getStatusCode() === 404) {
+            return [];
         }
 
-        return $response->toArray();
+        if ($response->getStatusCode() !== 200) {
+            throw new RuntimeException(
+                sprintf('Erreur WebService AGDUC DOC (%s)', $url)
+            );
+        }
+
+        return $response->toArray(false);
     }
 
     /**
-     * Retourne un nouvel ID Oracle pour un document.
-     *
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
+     * @return string Contenu binaire du fichier
      */
+    public function fetchDocumentFile(int $iddoc): string
+    {
+        $url = rtrim($this->wsHost, '/')
+            . '/'
+            . trim($this->wsBasePath, '/')
+            . '/DOC/FICHIER/'
+            . $iddoc;
+
+        try {
+            $response = $this->webClient->request('GET', $url, $this->buildOptions());
+
+            if ($response->getStatusCode() !== 200) {
+                throw new RuntimeException(
+                    sprintf('Impossible de récupérer le fichier du document %d.', $iddoc)
+                );
+            }
+
+            return $response->getContent();
+
+        } catch (ClientExceptionInterface $e) {
+            throw new RuntimeException(
+                sprintf('Accès refusé ou document inexistant (ID %d).', $iddoc),
+                0,
+                $e
+            );
+        } catch (RedirectionExceptionInterface $e) {
+            throw new RuntimeException(
+                sprintf('Redirection inattendue lors de l’accès au document %d.', $iddoc),
+                0,
+                $e
+            );
+        } catch (ServerExceptionInterface $e) {
+            throw new RuntimeException(
+                sprintf('Erreur interne AGDUC lors de la récupération du document %d.', $iddoc),
+                0,
+                $e
+            );
+        } catch (TransportExceptionInterface $e) {
+            throw new RuntimeException(
+                sprintf('Impossible de contacter le WebService AGDUC pour le document %d.', $iddoc),
+                0,
+                $e
+            );
+        }
+    }
+
     public function fetchNewDocId(): int
     {
-        $url = sprintf("%s/DOCKEY", $this->wsBasePath);
+        $url = rtrim($this->wsHost, '/')
+            . '/'
+            . trim($this->wsBasePath, '/')
+            . '/DOCKEY';
 
-        $response = $this->webClient->request('GET', $url, [
-            'verify_peer' => false,
-            'verify_host' => false,
-        ]);
+        $response = $this->webClient->request('GET', $url, $this->buildOptions());
 
         if ($response->getStatusCode() !== 200) {
-            throw new \Exception("Erreur WebService DOCKEY: HTTP " . $response->getStatusCode());
+            throw new RuntimeException('Erreur WebService AGDUC DOCKEY');
         }
 
-        $data = $response->toArray();
+        $data = $response->toArray(false);
+
+        if (!isset($data['id'])) {
+            throw new RuntimeException('Réponse DOCKEY invalide');
+        }
 
         return (int) $data['id'];
+    }
+
+    private function buildOptions(): array
+    {
+        $options = [
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+        ];
+
+        if ($this->wsBasic !== '') {
+            [$login, $password] = array_pad(explode(':', $this->wsBasic, 2), 2, '');
+            $options['auth_basic'] = [$login, $password];
+        }
+
+        if ($this->ignoreSsl) {
+            $options['verify_peer'] = false;
+            $options['verify_host'] = false;
+        }
+
+        return $options;
     }
 }

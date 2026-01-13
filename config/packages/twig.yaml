@@ -1,6 +1,16 @@
 twig:
     file_name_pattern: '*.twig'
 
+    # Dossier racine des templates
+    default_path: '%kernel.project_dir%/templates'
+
+    # Namespaces Twig (fortement recommandé)
+    paths:
+        '%kernel.project_dir%/templates/front': front
+        '%kernel.project_dir%/templates/layout': layout
+        '%kernel.project_dir%/templates/admin': admin
+
 when@test:
     twig:
         strict_variables: true
+
