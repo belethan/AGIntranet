@@ -26,6 +26,13 @@ services:
             - '../src/Kernel.php'
 
     # ----------------------------------------------------------
+    # 🔐 Injection explicite des scalaires NON autowirables
+    # ----------------------------------------------------------
+    App\Security\UserIdentityResolver:
+        arguments:
+            $appEnv: '%kernel.environment%'
+
+    # ----------------------------------------------------------
     # Client HTTP Symfony (instance unique partagée)
     # ----------------------------------------------------------
     Symfony\Contracts\HttpClient\HttpClientInterface:
