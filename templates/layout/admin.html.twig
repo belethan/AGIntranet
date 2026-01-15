@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body_class %}layout-admin{% endblock %}
+
+{% block body %}
+    <div id="layout-wrapper">
+
+        {% include 'partials/header.html.twig' %}
+        {% include 'partials/sidebar.html.twig' %}
+
+        <main class="app-wrapper">
+            <div class="container-fluid py-4">
+
+                {% block page_header %}
+                    {# breadcrumb / title optionnel #}
+                {% endblock %}
+
+                {% block content %}
+                    <p>Admin layout ready.</p>
+                {% endblock %}
+
+            </div>
+        </main>
+
+    </div>
+{% endblock %}

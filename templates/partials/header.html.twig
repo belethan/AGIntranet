@@ -1,0 +1,105 @@
+{# templates/partials/header.html.twig #}
+
+<header class="app-header" id="appHeader" data-controller="header">
+    <div class="container-fluid w-100 px-3">
+        <div class="d-flex justify-content-between align-items-center h-100">
+
+            {# LEFT SIDE : logo + sidebar toggle #}
+            <div class="d-flex align-items-center gap-2">
+
+                {# Sidebar toggle (mobile & desktop) #}
+                <button
+                    type="button"
+                    class="btn icon-btn text-muted"
+                    data-controller="sidebar"
+                    data-action="click->sidebar#toggle"
+                    aria-label="Toggle sidebar"
+                >
+                    <i class="ri-menu-2-line fs-4"></i>
+                </button>
+
+                {# Logo #}
+                <a href="{{ path('app_home')|default('#') }}"
+                   class="d-flex align-items-center gap-2 text-decoration-none ms-2">
+                    <img
+                        src="{{ asset('images/static/logoagduc.png') }}"
+                        alt="AGIntranet"
+                        height="32"
+                    >
+                    <span class="fw-semibold text-dark d-none d-md-inline">
+                        AGIntranet
+                    </span>
+                </a>
+
+            </div>
+
+            {# RIGHT SIDE : actions #}
+            <div class="d-flex align-items-center gap-2">
+
+                {# Theme toggle (light / dark) #}
+                <button
+                    type="button"
+                    class="btn icon-btn"
+                    data-action="click->header#toggleTheme"
+                    aria-label="Toggle theme"
+                >
+                    <i class="ri-moon-line fs-5"></i>
+                </button>
+
+                {# Fullscreen toggle #}
+                <button
+                    type="button"
+                    class="btn icon-btn"
+                    data-action="click->header#toggleFullscreen"
+                    aria-label="Toggle fullscreen"
+                >
+                    <i class="ri-fullscreen-line fs-5"></i>
+                </button>
+
+                {# User dropdown #}
+                <div class="dropdown">
+                    <button
+                        class="btn d-flex align-items-center gap-2"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                    >
+                        <span class="d-none d-md-block text-end">
+                            <span class="d-block fw-medium fs-14">
+                                {{ app.user ? app.user.userIdentifier : 'Invité' }}
+                            </span>
+                        </span>
+
+                        <img
+                            src="{{ asset('images/static/avatar-default.png') }}"
+                            alt="Avatar"
+                            class="rounded-circle"
+                            width="36"
+                            height="36"
+                        >
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="ri-user-line me-2"></i> Profil
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="ri-settings-3-line me-2"></i> Paramètres
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{ path('app_logout') }}">
+                                <i class="ri-logout-box-r-line me-2"></i> Déconnexion
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</header>

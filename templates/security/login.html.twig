@@ -1,0 +1,81 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+
+    <div class="mb-4">
+        <h2 class="fw-semibold mb-2">Bienvenue</h2>
+        <p class="text-muted mb-0">
+            Accédez à votre espace intranet sécurisé
+        </p>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error.messageKey|trans(error.messageData, 'security') }}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{{ path('app_login') }}">
+
+        <input
+            type="hidden"
+            name="_csrf_token"
+            value="{{ csrf_token('authenticate') }}"
+        >
+
+        <div class="mb-3">
+            <input
+                type="text"
+                name="username"
+                class="form-control form-control-lg"
+                placeholder="Identifiant"
+                value="{{ last_username }}"
+                required
+                autofocus
+            >
+        </div>
+
+        <div class="mb-4 position-relative">
+            <input
+                type="password"
+                name="password"
+                class="form-control form-control-lg"
+                placeholder="Mot de passe"
+                required
+            >
+
+            <button
+                type="button"
+                class="btn btn-link password-toggle"
+                data-controller="password"
+                data-action="click->password#toggle"
+                aria-label="Afficher le mot de passe"
+            >
+                <span aria-hidden="true">👁</span>
+            </button>
+        </div>
+
+        <div class="form-check mb-4">
+            <input
+                class="form-check-input"
+                type="checkbox"
+                name="_remember_me"
+                id="remember"
+            >
+            <label class="form-check-label" for="remember">
+                Se souvenir de moi
+            </label>
+        </div>
+
+        <button
+            type="submit"
+            class="btn btn-primary btn-lg w-100"
+        >
+            Se connecter
+        </button>
+
+    </form>
+
+{% endblock %}

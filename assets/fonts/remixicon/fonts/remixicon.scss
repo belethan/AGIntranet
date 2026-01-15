@@ -8,22 +8,30 @@
 *
 * Date: 2024-12-17
 */
-@font-face {font-family: "remixicon";
-  src: url('remixicon.eot?t=1734404658139'); /* IE9*/
-  src: url('remixicon.eot?t=1734404658139#iefix') format('embedded-opentype'), /* IE6-IE8 */
-  url("remixicon.woff2?t=1734404658139") format("woff2"),
-  url("remixicon.woff?t=1734404658139") format("woff"),
-  url('remixicon.ttf?t=1734404658139') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
-  url('remixicon.svg?t=1734404658139#remixicon') format('svg'); /* iOS 4.1- */
+@font-face {
+    font-family: "remixicon";
+    src: url("/assets/fonts/remixicon/fonts/remixicon.eot");
+    src:
+        url("/assets/fonts/remixicon/fonts/remixicon.eot?#iefix") format("embedded-opentype"),
+        url("/assets/fonts/remixicon/fonts/remixicon.woff2") format("woff2"),
+        url("/assets/fonts/remixicon/fonts/remixicon.woff") format("woff"),
+        url("/assets/fonts/remixicon/fonts/remixicon.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
 
-[class^="ri-"], [class*=" ri-"] {
-  font-family: 'remixicon' !important;
-  font-size: 16px;
-  font-style:normal;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+
+[class^="ri-"],
+[class*=" ri-"] {
+    font-family: "remixicon", sans-serif !important;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
+
 
 .ri-24-hours-fill:before { content: "\ea01"; }
 .ri-24-hours-line:before { content: "\ea02"; }

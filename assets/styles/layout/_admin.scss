@@ -1,0 +1,16 @@
+.layout-admin {
+    padding-top: var(--header-height);
+}
+
+.app-wrapper {
+    margin-left: var(--sidebar-width);
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Mobile */
+@media (max-width: 992px) {
+    .app-wrapper {
+        margin-left: 0;
+    }
+}
+

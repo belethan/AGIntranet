@@ -1,0 +1,7 @@
+symfonycasts_sass:
+    root_sass:
+        - '%kernel.project_dir%/assets/styles/app.scss'
+
+    sass_options:
+        style: expanded
+        source_map: true

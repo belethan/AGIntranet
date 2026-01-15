@@ -1,0 +1,9 @@
+.form-control {
+    border: 1px solid var(--gray-300);
+    transition: border-color .2s ease, box-shadow .2s ease;
+
+    &:focus {
+        border-color: #6a5cff;
+        box-shadow: 0 0 0 3px rgba(106,92,255,.15);
+    }
+}

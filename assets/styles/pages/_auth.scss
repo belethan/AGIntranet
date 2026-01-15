@@ -1,0 +1,42 @@
+.login-section {
+
+    h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: .5rem;
+    }
+
+    p {
+        color: var(--gray-600);
+        margin-bottom: 2rem;
+    }
+
+    .form-control {
+        height: 52px;
+        border-radius: var(--radius-md);
+        padding: 0 1rem;
+        font-size: .95rem;
+    }
+
+    .form-check-label {
+        font-size: .9rem;
+    }
+
+    .btn-primary {
+        height: 52px;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: .95rem;
+    }
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--gray-500);
+    cursor: pointer;
+}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <title>{% block title %}AGIntranet{% endblock %}</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {# Asset Mapper / Importmap #}
+    {{ importmap('app') }}
+
+    {% block styles %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+{% block body %}{% endblock %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

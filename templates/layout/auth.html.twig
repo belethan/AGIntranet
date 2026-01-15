@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{# Applique le background et le layout auth #}
+{% block body_class %}auth-bg{% endblock %}
+
+{% block body %}
+    <div class="auth-card">
+        <div class="main-wrapper">
+
+            {# Colonne gauche – illustration #}
+            <div class="decoration-section">
+                <img
+                    src="{{ asset('images/auth/login-illustration.png') }}"
+                    alt="Illustration connexion AGIntranet"
+                >
+            </div>
+
+            {# Colonne droite – contenu auth #}
+            <div class="login-section">
+
+                {# Logo AGDUC aligné à droite #}
+                <div class="text-end mb-4">
+                    <img
+                        src="{{ asset('images/static/logoagduc_cropped.png') }}"
+                        height="36"
+                        alt="AGDUC"
+                    >
+                </div>
+
+                {# Contenu spécifique (login, reset, register…) #}
+                {% block content %}{% endblock %}
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{# templates/partials/sidebar.html.twig #}
+
+<aside class="pe-app-sidebar" id="sidebar">
+    {# Logo / Brand #}
+    <div class="pe-app-sidebar-logo">
+        <a href="{{ path('app_home')|default('#') }}"
+           class="d-flex align-items-center gap-2 text-decoration-none">
+            <img
+                src="{{ asset('images/static/logoagduc.png') }}"
+                alt="AGIntranet"
+                height="32"
+            >
+            <span class="fw-semibold text-white">
+                AGIntranet
+            </span>
+        </a>
+    </div>
+
+    {# Menu #}
+    <nav class="pe-app-sidebar-menu" data-simplebar>
+        <ul class="pe-main-menu list-unstyled mb-0">
+
+            {# ===== DASHBOARD ===== #}
+            <li class="pe-menu-title">Général</li>
+
+            <li class="pe-slide">
+                <a href="{{ path('app_home')|default('#') }}"
+                   class="pe-nav-link {% if app.request.attributes.get('_route') == 'app_home' %}active{% endif %}">
+                    <i class="uil uil-dashboard pe-nav-icon"></i>
+                    <span class="pe-nav-content">Tableau de bord</span>
+                </a>
+            </li>
+
+            {# ===== UTILISATEURS ===== #}
+            <li class="pe-menu-title">Administration</li>
+
+            <li class="pe-slide pe-has-sub">
+                <a href="#sidebarUsers"
+                   class="pe-nav-link"
+                   data-bs-toggle="collapse"
+                   aria-expanded="false">
+                    <i class="uil uil-users-alt pe-nav-icon"></i>
+                    <span class="pe-nav-content">Utilisateurs</span>
+                    <i class="ri-arrow-right-s-line pe-nav-arrow arrow-right"></i>
+                </a>
+
+                <ul class="pe-slide-menu collapse" id="sidebarUsers">
+                    <li class="pe-slide-item">
+                        <a href="#"
+                           class="pe-nav-link">
+                            Liste des utilisateurs
+                        </a>
+                    </li>
+                    <li class="pe-slide-item">
+                        <a href="#"
+                           class="pe-nav-link">
+                            Comptes invités
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            {# ===== DOCUMENTS ===== #}
+            <li class="pe-slide pe-has-sub">
+                <a href="#sidebarDocuments"
+                   class="pe-nav-link"
+                   data-bs-toggle="collapse"
+                   aria-expanded="false">
+                    <i class="uil uil-folder-open pe-nav-icon"></i>
+                    <span class="pe-nav-content">Documents</span>
+                    <i class="ri-arrow-right-s-line pe-nav-arrow arrow-right"></i>
+                </a>
+
+                <ul class="pe-slide-menu collapse" id="sidebarDocuments">
+                    <li class="pe-slide-item">
+                        <a href="#"
+                           class="pe-nav-link">
+                            Mes documents
+                        </a>
+                    </li>
+                    <li class="pe-slide-item">
+                        <a href="#"
+                           class="pe-nav-link">
+                            Partagés
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            {# ===== PARAMÈTRES ===== #}
+            <li class="pe-menu-title">Système</li>
+
+            <li class="pe-slide">
+                <a href="#"
+                   class="pe-nav-link">
+                    <i class="uil uil-setting pe-nav-icon"></i>
+                    <span class="pe-nav-content">Paramètres</span>
+                </a>
+            </li>
+
+            <li class="pe-slide">
+                <a href="{{ path('app_logout') }}"
+                   class="pe-nav-link text-danger">
+                    <i class="uil uil-sign-out-alt pe-nav-icon"></i>
+                    <span class="pe-nav-content">Déconnexion</span>
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+</aside>

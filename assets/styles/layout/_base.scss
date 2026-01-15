@@ -1,0 +1,8 @@
+body {
+    background-color: var(--bg-body);
+    margin: 0;
+}
+
+main {
+    min-height: calc(100vh - var(--header-height));
+}

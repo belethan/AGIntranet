@@ -4,13 +4,13 @@ twig:
     # Dossier racine des templates
     default_path: '%kernel.project_dir%/templates'
 
-    # Namespaces Twig (fortement recommandé)
+    # Namespaces Twig (alignés avec l’arborescence réelle)
     paths:
-        '%kernel.project_dir%/templates/front': front
         '%kernel.project_dir%/templates/layout': layout
-        '%kernel.project_dir%/templates/admin': admin
+        '%kernel.project_dir%/templates/partials': partials
+        '%kernel.project_dir%/templates/security': security
+
 
 when@test:
     twig:
         strict_variables: true
-
