@@ -37,25 +37,32 @@
             >
         </div>
 
-        <div class="mb-4 position-relative">
+        <div class="mb-4 position-relative"
+             data-controller="password">
+
             <input
                 type="password"
                 name="password"
                 class="form-control form-control-lg"
                 placeholder="Mot de passe"
                 required
+                data-password-target="input"
             >
 
             <button
                 type="button"
                 class="btn btn-link password-toggle"
-                data-controller="password"
-                data-action="click->password#toggle"
+                data-action="password#toggle"
                 aria-label="Afficher le mot de passe"
             >
-                <span aria-hidden="true">👁</span>
+                {# Option Bootstrap Icons (recommandé) #}
+                <i class="bi bi-eye" aria-hidden="true" data-password-target="icon"></i>
+
+                {# si vous gardez l’emoji, supprimez la partie iconTarget dans le JS #}
+                {# <span aria-hidden="true">👁</span> #}
             </button>
         </div>
+
 
         <div class="form-check mb-4">
             <input

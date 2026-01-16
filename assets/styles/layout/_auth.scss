@@ -11,9 +11,9 @@
 
     display: flex;
     justify-content: center;   /* centrage horizontal */
-    align-items: flex-start;   /* plus de centrage vertical */
+    align-items: flex-start;   /* pas de centrage vertical */
 
-    padding-top: 50px;         /* 🔑 carte à 50px du haut */
+    padding-top: 20vh;         /* 🖥️ desktop : carte descendue */
 }
 
 /* ----------------------------------------------------------
@@ -58,7 +58,7 @@
     height: 100%;
 
     object-fit: cover;
-    object-position: right center; /* 🔑 focus visuel côté droit */
+    object-position: right center;
 }
 
 /* ----------------------------------------------------------
@@ -139,13 +139,25 @@
 /* ----------------------------------------------------------
    RESPONSIVE
 ---------------------------------------------------------- */
+
+/* Écrans moyens */
 @media (max-width: 1200px) {
     .auth-card {
         min-width: unset;
     }
+
+    /* 🔑 on annule la descente verticale */
+    .auth-bg {
+        padding-top: 5px;
+    }
 }
 
+/* Tablette & mobile */
 @media (max-width: 992px) {
+    .auth-bg {
+        padding-top: 5px; /* 🔑 toujours collé en haut */
+    }
+
     .main-wrapper {
         flex-direction: column;
     }

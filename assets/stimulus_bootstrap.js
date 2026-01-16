@@ -1,5 +1,10 @@
-import { startStimulusApp } from '@symfony/stimulus-bundle';
+import { Application } from '@hotwired/stimulus';
+import PasswordController from './controllers/password_controller.js';
 
-const app = startStimulusApp();
-// register any custom, 3rd party controllers here
-// app.register('some_controller_name', SomeImportedController);
+console.log('STIMULUS BOOTSTRAP LOADED');
+
+const application = Application.start();
+application.register('password', PasswordController);
+
+// Expose pour debug si besoin
+window.application = application;
